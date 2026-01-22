@@ -12,8 +12,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 
-# Get allowed client IDs from environment
+# Get allowed client IDs and authorized emails from environment
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
+AUTHORIZED_EMAILS = os.getenv('AUTHORIZED_EMAILS', '').split(';')
+# Clean up whitespace
+AUTHORIZED_EMAILS = [email.strip().lower() for email in AUTHORIZED_EMAILS if email.strip()]
 
 
 def verify_google_token(token):
@@ -71,6 +74,11 @@ def require_auth(f):
         
         if not user:
             return jsonify({'error': 'Invalid or expired token'}), 401
+        
+        # Check against AUTHORIZED_EMAILS if the list is not empty
+        if AUTHORIZED_EMAILS and user.get('email', '').lower() not in AUTHORIZED_EMAILS:
+            print(f"Unauthorized access attempt from: {user.get('email')}")
+            return jsonify({'error': 'Unauthorized: Your email is not on the authorized list.'}), 403
         
         # Store user in Flask's g object for access in the route
         g.user = user

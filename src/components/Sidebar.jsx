@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon } from 'lucide-react';
+import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 /**
@@ -15,6 +15,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0 }) {
         { id: 'dashboard', label: 'Dashboard', icon: Home, badge: null },
         { id: 'calendar', label: 'Calendar', icon: Calendar, badge: null },
         { id: 'workorder', label: 'Work Order', icon: Wrench, badge: null },
+        { id: 'insurance', label: 'Insurance Assist', icon: ShieldCheck, badge: null },
         { id: 'settings', label: 'Settings', icon: Settings, badge: null },
     ];
 

@@ -21,7 +21,11 @@ else:
 
 CORS(app, origins=origins, supports_credentials=True)
 
-from database import get_all_jobs, get_job_by_id, create_job, update_job, delete_job
+from database import (
+    get_all_jobs, get_job_by_id, create_job, update_job, delete_job,
+    get_all_insurance_cases, get_insurance_case_by_id, create_insurance_case, 
+    update_insurance_case, delete_insurance_case
+)
 from auth import require_auth
 
 
@@ -347,6 +351,55 @@ def import_to_calendar_endpoint():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# --- Insurance Supplement Assist Endpoints ---
+
+@app.route('/insurance-cases', methods=['GET'])
+@require_auth
+def list_insurance_cases():
+    """List all insurance cases."""
+    cases = get_all_insurance_cases()
+    return jsonify(cases)
+
+@app.route('/insurance-cases', methods=['POST'])
+@require_auth
+def create_new_insurance_case():
+    """Create a new insurance case."""
+    data = request.get_json()
+    if not data or 'name' not in data:
+        return jsonify({'error': 'Case name is required'}), 400
+    
+    case = create_insurance_case(data)
+    return jsonify(case), 201
+
+@app.route('/insurance-cases/<case_id>', methods=['GET'])
+@require_auth
+def get_single_insurance_case(case_id):
+    """Get a single insurance case by ID."""
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    return jsonify(case)
+
+@app.route('/insurance-cases/<case_id>', methods=['PATCH', 'PUT'])
+@require_auth
+def update_existing_insurance_case(case_id):
+    """Update an insurance case (e.g. adding photos)."""
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    case = update_insurance_case(case_id, data)
+    return jsonify(case)
+
+@app.route('/insurance-cases/<case_id>', methods=['DELETE'])
+@require_auth
+def delete_existing_insurance_case(case_id):
+    """Delete an insurance case and its photos."""
+    success = delete_insurance_case(case_id)
+    if not success:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    return jsonify({'success': True})
 
 @app.route('/health', methods=['GET'])
 def health_check():

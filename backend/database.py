@@ -6,7 +6,96 @@ Migrated from SQLite for production deployment on Google Cloud.
 import json
 import os
 from datetime import datetime
-from firebase_config import get_jobs_collection, init_firebase
+from firebase_config import get_jobs_collection, get_insurance_collection, get_storage_bucket, init_firebase
+
+# ... existing code ...
+
+# Insurance Case Operations
+
+def insurance_doc_to_dict(doc):
+    """Convert an Insurance Case DocumentSnapshot to a dictionary with ID."""
+    if not doc.exists:
+        return None
+    data = doc.to_dict()
+    data['id'] = str(doc.id)
+    
+    if 'photos' not in data or data['photos'] is None:
+        data['photos'] = []
+        
+    return data
+
+def get_all_insurance_cases():
+    """Retrieve all insurance cases from Firestore."""
+    insurance_ref = get_insurance_collection()
+    docs = insurance_ref.order_by('updated_at', direction='DESCENDING').stream()
+    return [insurance_doc_to_dict(doc) for doc in docs]
+
+def get_insurance_case_by_id(case_id):
+    """Retrieve a single insurance case by ID."""
+    insurance_ref = get_insurance_collection()
+    doc = insurance_ref.document(str(case_id)).get()
+    return insurance_doc_to_dict(doc)
+
+def create_insurance_case(data):
+    """Create a new insurance case in Firestore."""
+    insurance_ref = get_insurance_collection()
+    
+    now = datetime.now().isoformat()
+    
+    case_data = {
+        'name': data.get('name', 'Unnamed Case'),
+        'photos': data.get('photos', []), # List of {id, url, name, uploaded_at}
+        'created_at': now,
+        'updated_at': now
+    }
+    
+    update_time, doc_ref = insurance_ref.add(case_data)
+    return get_insurance_case_by_id(doc_ref.id)
+
+def update_insurance_case(case_id, data):
+    """Update an insurance case."""
+    insurance_ref = get_insurance_collection()
+    doc_ref = insurance_ref.document(str(case_id))
+    
+    updates = {}
+    if 'name' in data:
+        updates['name'] = data['name']
+    if 'photos' in data:
+        updates['photos'] = data['photos']
+        
+    if updates:
+        updates['updated_at'] = datetime.now().isoformat()
+        doc_ref.update(updates)
+        
+    return get_insurance_case_by_id(case_id)
+
+def delete_insurance_case(case_id):
+    """Delete an insurance case and its associated photos from storage."""
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return False
+        
+    # Delete photos from storage
+    try:
+        bucket = get_storage_bucket()
+        for photo in case.get('photos', []):
+            try:
+                # Extracts filename from URL or uses the stored name if it's the path
+                # For simplicity, if we store the full path/name in Firebase Storage, 
+                # we use that.
+                if 'name' in photo:
+                    blob = bucket.blob(f"insurance_photos/{case_id}/{photo['name']}")
+                    if blob.exists():
+                        blob.delete()
+            except Exception as e:
+                print(f"Failed to delete photo {photo.get('name')}: {e}")
+    except Exception as e:
+        print(f"Storage error during case deletion: {e}")
+        
+    # Delete Firestore document
+    insurance_ref = get_insurance_collection()
+    insurance_ref.document(str(case_id)).delete()
+    return True
 
 # Initialize Firebase
 try:

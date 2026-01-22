@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import PDFOrder from '../components/PDFOrder';
 import JobsList from '../components/JobsList';
+import InsuranceAssist from '../components/InsuranceAssist';
 import { useJobs } from '../hooks/useJobs';
-import { X, Calendar, Printer, Sparkles, Check, Loader2, RotateCcw, ChevronDown, ChevronUp, FileText, Briefcase } from 'lucide-react';
+import { X, Calendar, Printer, Sparkles, Check, Loader2, RotateCcw, ChevronDown, ChevronUp, FileText, Briefcase, ShieldCheck } from 'lucide-react';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/dark.css';
@@ -425,6 +426,8 @@ function MobileLayout({ form }) {
                         onMarkCarHere={markCarHere}
                     />
                 </div>
+            ) : activeView === 'insurance' ? (
+                <InsuranceAssist />
             ) : (
                 renderWorkOrderForm()
             )}
@@ -446,6 +449,16 @@ function MobileLayout({ form }) {
                                 {jobs.length > 9 ? '9+' : jobs.length}
                             </span>
                         )}
+                    </button>
+                    <button
+                        onClick={() => setActiveView('insurance')}
+                        className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${activeView === 'insurance'
+                            ? 'text-accent'
+                            : 'text-muted'
+                            }`}
+                    >
+                        <ShieldCheck size={20} />
+                        <span className="text-[10px] font-bold uppercase">Insurance</span>
                     </button>
                     <button
                         onClick={() => setActiveView('workorder')}

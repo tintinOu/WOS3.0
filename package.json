@@ -10,7 +10,11 @@
     },
     "dependencies": {
         "@react-pdf/renderer": "^3.1.14",
+        "browser-image-compression": "^2.0.2",
+        "file-saver": "^2.0.5",
+        "firebase": "^10.7.1",
         "flatpickr": "^4.6.13",
+        "jszip": "^3.10.1",
         "lucide-react": "^0.303.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"

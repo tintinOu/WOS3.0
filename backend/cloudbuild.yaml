@@ -34,7 +34,7 @@ steps:
       - '--set-secrets'
       - 'GEMINI_API_KEY=gemini-api-key:latest,GOOGLE_CLIENT_ID=google-client-id:latest'
       - '--set-env-vars'
-      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS}'
+      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS},AUTHORIZED_EMAILS=${_AUTHORIZED_EMAILS}'
 
 # Store images in Container Registry
 images:
@@ -44,6 +44,7 @@ images:
 # Substitution variables (set during build or in trigger)
 substitutions:
   _ALLOWED_ORIGINS: 'https://your-username.github.io'
+  _AUTHORIZED_EMAILS: '311autobodyrepair@gmail.com;acctingor@gmail.com'
 
 options:
   logging: CLOUD_LOGGING_ONLY
