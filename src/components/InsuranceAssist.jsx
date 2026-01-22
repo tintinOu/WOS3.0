@@ -10,7 +10,8 @@ import {
     ChevronRight,
     Loader2,
     FileArchive,
-    ImagePlus
+    ImagePlus,
+    ZoomIn
 } from 'lucide-react';
 import { useInsurance } from '../hooks/useInsurance';
 import JSZip from 'jszip';
@@ -30,6 +31,9 @@ export default function InsuranceAssist() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadStatus, setUploadStatus] = useState('');
 
+    // For photo enlargement
+    const [enlargedPhoto, setEnlargedPhoto] = useState(null);
+
     // For uploading during case creation
     const [pendingPhotos, setPendingPhotos] = useState([]);
 
@@ -40,6 +44,15 @@ export default function InsuranceAssist() {
     const filteredCases = cases.filter(c =>
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Toggle case selection (click to open, click again to close)
+    const handleCaseClick = (c) => {
+        if (selectedCase?.id === c.id) {
+            setSelectedCase(null);
+        } else {
+            setSelectedCase(c);
+        }
+    };
 
     // Handle photos selected during case creation
     const handleCreateModalPhotos = (e) => {
@@ -52,7 +65,7 @@ export default function InsuranceAssist() {
     };
 
     // Upload photo via backend API
-    const uploadPhotoToBackend = async (caseId, file, onProgress) => {
+    const uploadPhotoToBackend = async (caseId, file) => {
         const token = getAuthToken();
         const formData = new FormData();
         formData.append('file', file);
@@ -80,10 +93,8 @@ export default function InsuranceAssist() {
         setUploadStatus('Creating case...');
 
         try {
-            // 1. Create the case first
             const result = await createCase(newCaseName);
 
-            // 2. If there are pending photos, upload them
             if (pendingPhotos.length > 0) {
                 for (let i = 0; i < pendingPhotos.length; i++) {
                     const file = pendingPhotos[i];
@@ -91,7 +102,6 @@ export default function InsuranceAssist() {
                     setUploadProgress(Math.round(((i + 1) / pendingPhotos.length) * 100));
 
                     const uploadResult = await uploadPhotoToBackend(result.id, file);
-                    // Update selectedCase with latest data
                     if (i === pendingPhotos.length - 1) {
                         setSelectedCase(uploadResult.case);
                     }
@@ -100,10 +110,7 @@ export default function InsuranceAssist() {
                 setSelectedCase(result);
             }
 
-            // Refresh cases list
             await fetchCases();
-
-            // Reset modal state
             setNewCaseName('');
             setPendingPhotos([]);
             setIsCreateModalOpen(false);
@@ -132,13 +139,11 @@ export default function InsuranceAssist() {
 
                 const result = await uploadPhotoToBackend(selectedCase.id, file);
 
-                // Update selected case with latest data
                 if (i === files.length - 1) {
                     setSelectedCase(result.case);
                 }
             }
 
-            // Refresh cases list
             await fetchCases();
 
         } catch (err) {
@@ -152,7 +157,8 @@ export default function InsuranceAssist() {
         }
     };
 
-    const handleDeletePhoto = async (photo) => {
+    const handleDeletePhoto = async (photo, e) => {
+        e.stopPropagation();
         if (!window.confirm('Delete this photo?')) return;
 
         try {
@@ -176,35 +182,90 @@ export default function InsuranceAssist() {
         }
     };
 
+    // Download single photo
+    const handleDownloadPhoto = async (photo, e) => {
+        e.stopPropagation();
+        try {
+            // Use a proxy approach - open in new tab which will trigger download
+            const link = document.createElement('a');
+            link.href = photo.url;
+            link.download = photo.name;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err) {
+            console.error('Download error:', err);
+            // Fallback: open in new tab
+            window.open(photo.url, '_blank');
+        }
+    };
+
+    // Download all as ZIP via backend proxy
     const handleDownloadAll = async () => {
         if (!selectedCase?.photos?.length) return;
 
-        const zip = new JSZip();
-        const photosFolder = zip.folder(selectedCase.name);
-
         try {
-            setUploadStatus('Preparing ZIP...');
+            setUploadStatus('Downloading photos...');
             setIsUploading(true);
+
+            const zip = new JSZip();
+            const photosFolder = zip.folder(selectedCase.name);
 
             for (let i = 0; i < selectedCase.photos.length; i++) {
                 const photo = selectedCase.photos[i];
                 setUploadProgress(Math.round((i / selectedCase.photos.length) * 100));
-                const response = await fetch(photo.url);
-                const blob = await response.blob();
-                photosFolder.file(photo.name, blob);
+                setUploadStatus(`Fetching ${i + 1}/${selectedCase.photos.length}...`);
+
+                try {
+                    // Try fetching directly first
+                    const response = await fetch(photo.url, { mode: 'cors' });
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        photosFolder.file(photo.name, blob);
+                    } else {
+                        // If CORS fails, try fetching via image element
+                        const blob = await fetchImageAsBlob(photo.url);
+                        photosFolder.file(photo.name, blob);
+                    }
+                } catch (fetchErr) {
+                    console.warn(`Failed to fetch ${photo.name}, trying alternative method...`);
+                    // Alternative: fetch via image element
+                    const blob = await fetchImageAsBlob(photo.url);
+                    photosFolder.file(photo.name, blob);
+                }
             }
 
+            setUploadStatus('Creating ZIP...');
             const content = await zip.generateAsync({ type: 'blob' });
             saveAs(content, `${selectedCase.name}_photos.zip`);
 
         } catch (err) {
             console.error('Download all error:', err);
-            alert('Failed to download photos');
+            alert('Failed to download photos. Try downloading individual photos.');
         } finally {
             setIsUploading(false);
             setUploadProgress(0);
             setUploadStatus('');
         }
+    };
+
+    // Helper to fetch image via canvas to bypass CORS
+    const fetchImageAsBlob = (url) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(resolve, 'image/jpeg', 0.95);
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
     };
 
     const handleDeleteCase = async (caseId, e) => {
@@ -253,7 +314,7 @@ export default function InsuranceAssist() {
                     {filteredCases.map(c => (
                         <div
                             key={c.id}
-                            onClick={() => setSelectedCase(c)}
+                            onClick={() => handleCaseClick(c)}
                             className={`group flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-all ${selectedCase?.id === c.id
                                     ? 'bg-accent/10 border-accent/30'
                                     : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
@@ -356,23 +417,38 @@ export default function InsuranceAssist() {
                             {selectedCase.photos?.length > 0 ? (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                     {selectedCase.photos.map((photo, idx) => (
-                                        <div key={photo.id} className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all">
+                                        <div
+                                            key={photo.id}
+                                            onClick={() => setEnlargedPhoto(photo)}
+                                            className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all cursor-pointer"
+                                        >
                                             <img
                                                 src={photo.url}
                                                 alt={photo.name}
                                                 className="w-full h-full object-cover"
                                             />
                                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end gap-2">
                                                     <button
-                                                        onClick={() => handleDeletePhoto(photo)}
+                                                        onClick={(e) => handleDownloadPhoto(photo, e)}
+                                                        className="p-2 bg-black/60 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                                        title="Download"
+                                                    >
+                                                        <Download size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeletePhoto(photo, e)}
                                                         className="p-2 bg-black/60 text-white rounded-lg hover:bg-accent transition-colors"
+                                                        title="Delete"
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>
                                                 </div>
-                                                <div className="text-white text-[10px] font-bold truncate">
-                                                    {photo.name}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="text-white text-[10px] font-bold truncate flex-1">
+                                                        {photo.name}
+                                                    </div>
+                                                    <ZoomIn size={14} className="text-white/60 ml-2" />
                                                 </div>
                                             </div>
                                             <div className="absolute top-2 left-2 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center text-[10px] font-bold">
@@ -437,7 +513,6 @@ export default function InsuranceAssist() {
                             </div>
 
                             <div className="space-y-6">
-                                {/* Case Name */}
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Case Name *</label>
                                     <input
@@ -450,7 +525,6 @@ export default function InsuranceAssist() {
                                     />
                                 </div>
 
-                                {/* Photo Upload Section */}
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Photos (Optional)</label>
                                     <div
@@ -469,7 +543,6 @@ export default function InsuranceAssist() {
                                         className="hidden"
                                     />
 
-                                    {/* Pending Photos Preview */}
                                     {pendingPhotos.length > 0 && (
                                         <div className="mt-4 flex flex-wrap gap-2">
                                             {pendingPhotos.map((file, idx) => (
@@ -491,7 +564,6 @@ export default function InsuranceAssist() {
                                     )}
                                 </div>
 
-                                {/* Progress during creation */}
                                 {isUploading && (
                                     <div className="bg-black/40 rounded-xl p-4">
                                         <div className="flex items-center justify-between text-xs text-white mb-2">
@@ -525,6 +597,41 @@ export default function InsuranceAssist() {
                                     )}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Photo Enlargement Modal */}
+            {enlargedPhoto && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg"
+                    onClick={() => setEnlargedPhoto(null)}
+                >
+                    <div className="relative max-w-5xl max-h-[90vh] w-full">
+                        <button
+                            onClick={() => setEnlargedPhoto(null)}
+                            className="absolute top-4 right-4 z-10 p-3 bg-black/60 text-white rounded-full hover:bg-accent transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <img
+                            src={enlargedPhoto.url}
+                            alt={enlargedPhoto.name}
+                            className="w-full h-full object-contain rounded-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+
+                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl px-4 py-3">
+                            <span className="text-white font-bold text-sm truncate">{enlargedPhoto.name}</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleDownloadPhoto(enlargedPhoto, e); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-colors"
+                            >
+                                <Download size={14} />
+                                <span>Download</span>
+                            </button>
                         </div>
                     </div>
                 </div>
