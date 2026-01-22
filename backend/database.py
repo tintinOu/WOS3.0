@@ -8,8 +8,6 @@ import os
 from datetime import datetime
 from firebase_config import get_jobs_collection, get_insurance_collection, get_storage_bucket, init_firebase
 
-# ... existing code ...
-
 # Insurance Case Operations
 
 def insurance_doc_to_dict(doc):
