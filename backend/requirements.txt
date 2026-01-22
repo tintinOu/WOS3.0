@@ -1,0 +1,8 @@
+flask==3.0.0
+flask-cors==4.0.0
+pymupdf==1.25.3
+python-dotenv==1.0.0
+gunicorn==21.2.0
+firebase-admin==6.2.0
+google-auth==2.23.0
+google-cloud-secret-manager==2.16.0

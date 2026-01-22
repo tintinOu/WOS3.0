@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+backend/venv/
+
+# Build outputs
+dist/
+build/
+
+# Environment files - NEVER COMMIT THESE
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Credentials - NEVER COMMIT THESE
+google-credentials.json
+firebase-credentials.json
+*.pem
+*.key
+service-account*.json
+
+# Database files (local development)
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+__pycache__/
+*.pyc
+
+# Testing
+coverage/
+.nyc_output/

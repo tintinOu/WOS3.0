@@ -1,0 +1,49 @@
+# Cloud Build Configuration for Backend Deployment to Cloud Run
+# Run: gcloud builds submit --config cloudbuild.yaml
+
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/wos-backend:latest'
+      - './backend'
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/wos-backend:latest'
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'wos-backend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/wos-backend:latest'
+
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'GEMINI_API_KEY=gemini-api-key:latest,GOOGLE_CLIENT_ID=google-client-id:latest'
+      - '--set-env-vars'
+      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS}'
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/wos-backend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/wos-backend:latest'
+
+# Substitution variables (set during build or in trigger)
+substitutions:
+  _ALLOWED_ORIGINS: 'https://your-username.github.io'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,389 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   311 AUTO BODY - DESIGN SYSTEM
+   Style: Glassmorphism + Dark/Light Mode
+   Colors: Black / White / Red
+   Typography: Fira Code / Fira Sans
+   Generated via ui-ux-pro-max workflow
+   ============================================ */
+
+:root {
+    /* === DARK MODE (Default) === */
+    --color-bg: #0A0A0A;
+    --color-surface: rgba(255, 255, 255, 0.03);
+    --color-surface-elevated: rgba(255, 255, 255, 0.06);
+    --color-surface-hover: rgba(255, 255, 255, 0.08);
+
+    --color-text: #FFFFFF;
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    --color-text-muted: rgba(255, 255, 255, 0.4);
+
+    --color-accent: #EF4444;
+    --color-accent-hover: #DC2626;
+    --color-accent-glow: rgba(239, 68, 68, 0.3);
+
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-hover: rgba(255, 255, 255, 0.15);
+
+    /* Effects */
+    --glass-blur: 20px;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 30px rgba(239, 68, 68, 0.2);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 300ms ease;
+}
+
+/* === LIGHT MODE === */
+.light {
+    --color-bg: #FAFAFA;
+    --color-surface: rgba(0, 0, 0, 0.02);
+    --color-surface-elevated: rgba(0, 0, 0, 0.04);
+    --color-surface-hover: rgba(0, 0, 0, 0.06);
+
+    --color-text: #0A0A0A;
+    --color-text-secondary: rgba(0, 0, 0, 0.7);
+    --color-text-muted: rgba(0, 0, 0, 0.4);
+
+    --color-accent: #DC2626;
+    --color-accent-hover: #B91C1C;
+    --color-accent-glow: rgba(220, 38, 38, 0.2);
+
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-border-hover: rgba(0, 0, 0, 0.15);
+
+    --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 30px rgba(220, 38, 38, 0.15);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: background-color var(--transition-slow), color var(--transition-slow);
+}
+
+/* Headings use Fira Code */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Fira Code', monospace;
+}
+
+/* ============================================
+   GLASSMORPHISM UTILITIES
+   ============================================ */
+
+@layer components {
+
+    /* Standard Glass Surface */
+    .glass {
+        background: var(--color-surface);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: var(--glass-border);
+        transition: all var(--transition-normal);
+    }
+
+    /* Elevated Glass (more prominent) */
+    .glass-elevated {
+        background: var(--color-surface-elevated);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: var(--glass-border);
+        box-shadow: var(--shadow-lg);
+        transition: all var(--transition-normal);
+    }
+
+    /* Surface Cards */
+    .surface {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        transition: all var(--transition-normal);
+    }
+
+    .surface:hover {
+        background: var(--color-surface-hover);
+        border-color: var(--color-border-hover);
+    }
+
+    /* Primary CTA Button - Red Accent */
+    .btn-accent {
+        background: var(--color-accent);
+        color: white;
+        font-family: 'Fira Code', monospace;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        box-shadow: 0 4px 20px var(--color-accent-glow);
+    }
+
+    .btn-accent:hover {
+        background: var(--color-accent-hover);
+        box-shadow: 0 6px 30px var(--color-accent-glow);
+        transform: translateY(-2px);
+    }
+
+    .btn-accent:active {
+        transform: translateY(0);
+    }
+
+    /* Ghost Button */
+    .btn-ghost {
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-family: 'Fira Code', monospace;
+        font-weight: 500;
+        border: 1px solid var(--color-border);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+    }
+
+    .btn-ghost:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text);
+        border-color: var(--color-border-hover);
+    }
+
+    /* Input Fields */
+    .input-field {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text);
+        font-family: 'Fira Sans', sans-serif;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        transition: all var(--transition-normal);
+    }
+
+    .input-field:focus {
+        background: var(--color-surface-elevated);
+        border-color: var(--color-accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--color-accent-glow);
+    }
+
+    .input-field::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    /* Text Utilities */
+    .text-primary {
+        color: var(--color-text);
+    }
+
+    .text-secondary {
+        color: var(--color-text-secondary);
+    }
+
+    .text-muted {
+        color: var(--color-text-muted);
+    }
+
+    .text-accent {
+        color: var(--color-accent);
+    }
+
+    /* Background Utilities */
+    .bg-base {
+        background-color: var(--color-bg);
+    }
+
+    .bg-surface {
+        background: var(--color-surface);
+    }
+
+    .bg-accent {
+        background: var(--color-accent);
+    }
+
+    /* Border Utilities */
+    .border-subtle {
+        border-color: var(--color-border);
+    }
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-hover);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px var(--color-accent-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 40px var(--color-accent-glow);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+
+::selection {
+    background: var(--color-accent);
+    color: white;
+}
+
+/* ============================================
+   FOCUS STATES (Accessibility)
+   ============================================ */
+
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   THEME TOGGLE BUTTON
+   ============================================ */
+
+.theme-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+}
+
+.theme-toggle:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-normal);
+}
+
+.theme-toggle:hover svg {
+    color: var(--color-accent);
+}
