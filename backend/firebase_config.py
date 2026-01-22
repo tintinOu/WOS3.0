@@ -37,10 +37,8 @@ def get_storage_bucket():
     # Initialize Firebase if not already
     get_db()
     
-    # Get the default bucket name from project ID
-    # Firebase default bucket is [project-id].appspot.com
-    project_id = os.getenv('GOOGLE_CLOUD_PROJECT', 'wos3-485114')
-    bucket_name = f"{project_id}.appspot.com"
+    # Use the exact bucket name from Firebase Console
+    bucket_name = "wos3-485114.firebasestorage.app"
     
     return storage.bucket(bucket_name)
 
