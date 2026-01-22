@@ -13,21 +13,22 @@ import {
     ImagePlus
 } from 'lucide-react';
 import { useInsurance } from '../hooks/useInsurance';
-import { storage } from '../firebase-client';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import imageCompression from 'browser-image-compression';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { useAuth } from '../contexts/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function InsuranceAssist() {
-    const { cases, loading, createCase, updateCase, deleteCase } = useInsurance();
+    const { cases, loading, createCase, updateCase, deleteCase, fetchCases } = useInsurance();
+    const { getAuthToken } = useAuth();
     const [selectedCase, setSelectedCase] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newCaseName, setNewCaseName] = useState('');
     const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0); // Now a number 0-100
-    const [uploadStatus, setUploadStatus] = useState(''); // Text status
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState('');
 
     // For uploading during case creation
     const [pendingPhotos, setPendingPhotos] = useState([]);
@@ -50,6 +51,28 @@ export default function InsuranceAssist() {
         setPendingPhotos(prev => prev.filter((_, i) => i !== index));
     };
 
+    // Upload photo via backend API
+    const uploadPhotoToBackend = async (caseId, file, onProgress) => {
+        const token = getAuthToken();
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_URL}/insurance-cases/${caseId}/photos`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        return response.json();
+    };
+
     const handleCreateCase = async () => {
         if (!newCaseName.trim()) return;
 
@@ -62,61 +85,23 @@ export default function InsuranceAssist() {
 
             // 2. If there are pending photos, upload them
             if (pendingPhotos.length > 0) {
-                const uploadedPhotos = [];
-
                 for (let i = 0; i < pendingPhotos.length; i++) {
                     const file = pendingPhotos[i];
-                    const photoIndex = i + 1;
+                    setUploadStatus(`Uploading ${i + 1}/${pendingPhotos.length}...`);
+                    setUploadProgress(Math.round(((i + 1) / pendingPhotos.length) * 100));
 
-                    setUploadStatus(`Compressing ${photoIndex}/${pendingPhotos.length}...`);
-                    setUploadProgress(Math.round((i / pendingPhotos.length) * 50));
-
-                    // Compress
-                    const options = {
-                        maxSizeMB: 0.19,
-                        maxWidthOrHeight: 1920,
-                        useWebWorker: true
-                    };
-                    const compressedFile = await imageCompression(file, options);
-
-                    // Rename: casename_1.jpg format
-                    const extension = file.name.split('.').pop();
-                    const sanitizedName = newCaseName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
-                    const fileName = `${sanitizedName}_${photoIndex}.${extension}`;
-
-                    setUploadStatus(`Uploading ${photoIndex}/${pendingPhotos.length}...`);
-
-                    // Upload with progress
-                    const storageRef = ref(storage, `insurance_photos/${result.id}/${fileName}`);
-                    await new Promise((resolve, reject) => {
-                        const uploadTask = uploadBytesResumable(storageRef, compressedFile);
-                        uploadTask.on('state_changed',
-                            (snapshot) => {
-                                const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                const overallProgress = 50 + ((i + fileProgress / 100) / pendingPhotos.length) * 50;
-                                setUploadProgress(Math.round(overallProgress));
-                            },
-                            reject,
-                            async () => {
-                                const url = await getDownloadURL(uploadTask.snapshot.ref);
-                                uploadedPhotos.push({
-                                    id: Date.now() + i,
-                                    name: fileName,
-                                    url: url,
-                                    uploaded_at: new Date().toISOString()
-                                });
-                                resolve();
-                            }
-                        );
-                    });
+                    const uploadResult = await uploadPhotoToBackend(result.id, file);
+                    // Update selectedCase with latest data
+                    if (i === pendingPhotos.length - 1) {
+                        setSelectedCase(uploadResult.case);
+                    }
                 }
-
-                // Update case with photos
-                const updated = await updateCase(result.id, { photos: uploadedPhotos });
-                setSelectedCase(updated);
             } else {
                 setSelectedCase(result);
             }
+
+            // Refresh cases list
+            await fetchCases();
 
             // Reset modal state
             setNewCaseName('');
@@ -138,62 +123,23 @@ export default function InsuranceAssist() {
         if (!files.length || !selectedCase) return;
 
         setIsUploading(true);
-        const currentPhotos = [...(selectedCase.photos || [])];
-        const nextIndex = currentPhotos.length + 1;
 
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const photoIndex = nextIndex + i;
-
-                setUploadStatus(`Compressing ${i + 1}/${files.length}...`);
-                setUploadProgress(Math.round((i / files.length) * 50));
-
-                // 1. Compress Image (< 200KB)
-                const options = {
-                    maxSizeMB: 0.19,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true
-                };
-                const compressedFile = await imageCompression(file, options);
-
-                // 2. Rename: casename_1.jpg format
-                const extension = file.name.split('.').pop();
-                const sanitizedName = selectedCase.name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
-                const fileName = `${sanitizedName}_${photoIndex}.${extension}`;
-
                 setUploadStatus(`Uploading ${i + 1}/${files.length}...`);
+                setUploadProgress(Math.round(((i + 1) / files.length) * 100));
 
-                // 3. Upload with progress tracking
-                const storageRef = ref(storage, `insurance_photos/${selectedCase.id}/${fileName}`);
+                const result = await uploadPhotoToBackend(selectedCase.id, file);
 
-                await new Promise((resolve, reject) => {
-                    const uploadTask = uploadBytesResumable(storageRef, compressedFile);
-
-                    uploadTask.on('state_changed',
-                        (snapshot) => {
-                            const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            const overallProgress = 50 + ((i + fileProgress / 100) / files.length) * 50;
-                            setUploadProgress(Math.round(overallProgress));
-                        },
-                        (error) => reject(error),
-                        async () => {
-                            const url = await getDownloadURL(uploadTask.snapshot.ref);
-                            currentPhotos.push({
-                                id: Date.now() + i,
-                                name: fileName,
-                                url: url,
-                                uploaded_at: new Date().toISOString()
-                            });
-                            resolve();
-                        }
-                    );
-                });
+                // Update selected case with latest data
+                if (i === files.length - 1) {
+                    setSelectedCase(result.case);
+                }
             }
 
-            // 4. Update Database
-            const updated = await updateCase(selectedCase.id, { photos: currentPhotos });
-            setSelectedCase(updated);
+            // Refresh cases list
+            await fetchCases();
 
         } catch (err) {
             console.error('Upload error:', err);
@@ -210,12 +156,20 @@ export default function InsuranceAssist() {
         if (!window.confirm('Delete this photo?')) return;
 
         try {
-            const storageRef = ref(storage, `insurance_photos/${selectedCase.id}/${photo.name}`);
-            await deleteObject(storageRef);
+            const token = getAuthToken();
+            const response = await fetch(
+                `${API_URL}/insurance-cases/${selectedCase.id}/photos/${encodeURIComponent(photo.name)}`,
+                {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
 
-            const newPhotos = selectedCase.photos.filter(p => p.name !== photo.name);
-            const updated = await updateCase(selectedCase.id, { photos: newPhotos });
-            setSelectedCase(updated);
+            if (!response.ok) throw new Error('Failed to delete photo');
+
+            const result = await response.json();
+            setSelectedCase(result.case);
+            await fetchCases();
         } catch (err) {
             console.error('Delete photo error:', err);
             alert('Failed to delete photo');
@@ -301,8 +255,8 @@ export default function InsuranceAssist() {
                             key={c.id}
                             onClick={() => setSelectedCase(c)}
                             className={`group flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-all ${selectedCase?.id === c.id
-                                ? 'bg-accent/10 border-accent/30'
-                                : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
+                                    ? 'bg-accent/10 border-accent/30'
+                                    : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
                                 }`}
                         >
                             <div className="flex-1 min-w-0">
@@ -370,7 +324,6 @@ export default function InsuranceAssist() {
                                     {isUploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
                                     <span>Upload Photos</span>
                                 </button>
-                                {/* Removed capture="environment" to open photo library instead of camera */}
                                 <input
                                     type="file"
                                     multiple

@@ -392,6 +392,121 @@ def update_existing_insurance_case(case_id):
     case = update_insurance_case(case_id, data)
     return jsonify(case)
 
+
+@app.route('/insurance-cases/<case_id>/photos', methods=['POST'])
+@require_auth
+def upload_insurance_photo(case_id):
+    """Upload a photo to an insurance case."""
+    from firebase_config import get_storage_bucket
+    from PIL import Image
+    import io
+    import uuid
+    
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    try:
+        # Get case name for filename
+        case_name = case.get('name', 'case')
+        sanitized_name = ''.join(c if c.isalnum() else '_' for c in case_name.lower())
+        sanitized_name = '_'.join(filter(None, sanitized_name.split('_')))
+        
+        # Get next photo index
+        current_photos = case.get('photos', [])
+        photo_index = len(current_photos) + 1
+        
+        # Read and compress image
+        img = Image.open(file)
+        img = img.convert('RGB')  # Ensure RGB for JPEG
+        
+        # Resize if too large
+        max_size = 1920
+        if max(img.size) > max_size:
+            ratio = max_size / max(img.size)
+            new_size = tuple(int(dim * ratio) for dim in img.size)
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+        
+        # Compress to ~200KB
+        output = io.BytesIO()
+        quality = 85
+        img.save(output, format='JPEG', quality=quality, optimize=True)
+        
+        while output.tell() > 200 * 1024 and quality > 20:
+            output = io.BytesIO()
+            quality -= 10
+            img.save(output, format='JPEG', quality=quality, optimize=True)
+        
+        output.seek(0)
+        
+        # Generate filename: casename_1.jpg
+        filename = f"{sanitized_name}_{photo_index}.jpg"
+        
+        # Upload to Firebase Storage
+        bucket = get_storage_bucket()
+        blob = bucket.blob(f"insurance_photos/{case_id}/{filename}")
+        blob.upload_from_file(output, content_type='image/jpeg')
+        blob.make_public()
+        url = blob.public_url
+        
+        # Add to case photos
+        photo_data = {
+            'id': str(uuid.uuid4()),
+            'name': filename,
+            'url': url,
+            'uploaded_at': datetime.now().isoformat()
+        }
+        current_photos.append(photo_data)
+        
+        # Update case
+        from database import update_insurance_case
+        updated_case = update_insurance_case(case_id, {'photos': current_photos})
+        
+        return jsonify({
+            'photo': photo_data,
+            'case': updated_case
+        }), 201
+        
+    except Exception as e:
+        print(f"Photo upload error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/insurance-cases/<case_id>/photos/<photo_name>', methods=['DELETE'])
+@require_auth
+def delete_insurance_photo(case_id, photo_name):
+    """Delete a specific photo from an insurance case."""
+    from firebase_config import get_storage_bucket
+    
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    
+    try:
+        # Delete from storage
+        bucket = get_storage_bucket()
+        blob = bucket.blob(f"insurance_photos/{case_id}/{photo_name}")
+        if blob.exists():
+            blob.delete()
+        
+        # Remove from case
+        current_photos = [p for p in case.get('photos', []) if p.get('name') != photo_name]
+        from database import update_insurance_case
+        updated_case = update_insurance_case(case_id, {'photos': current_photos})
+        
+        return jsonify({'success': True, 'case': updated_case})
+    except Exception as e:
+        print(f"Photo delete error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/insurance-cases/<case_id>', methods=['DELETE'])
 @require_auth
 def delete_existing_insurance_case(case_id):

@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import Dashboard from '../components/Dashboard';
 import JobDetails from '../components/JobDetails';
 import InsuranceAssist from '../components/InsuranceAssist';
+import { useAuth } from '../contexts/AuthContext';
 
 import { useJobs } from '../hooks/useJobs';
 import { X, Calendar, Wrench, Printer, FileText, Info, Sparkles, Check, Loader2, RotateCcw } from 'lucide-react';
@@ -47,6 +48,8 @@ function DesktopLayout({ form }) {
         handleFileUpload,
         resetForm,
     } = form;
+
+    const { signOut } = useAuth();
 
     // Navigation state
     const [activeView, setActiveView] = useState('dashboard');
@@ -424,6 +427,7 @@ function DesktopLayout({ form }) {
                 collapsed={sidebarCollapsed}
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                 jobCount={jobs.length}
+                onLogout={signOut}
             />
 
             {/* Main Content Area */}

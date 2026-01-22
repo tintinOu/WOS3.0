@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon, ShieldCheck } from 'lucide-react';
+import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon, ShieldCheck, LogOut } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 /**
@@ -7,7 +7,7 @@ import { useTheme } from '../contexts/ThemeContext';
  * Features: Dark/Light mode toggle, Red accent active states
  * Following ui-ux-pro-max workflow guidelines
  */
-function Sidebar({ activeView, onViewChange, jobsCount = 0 }) {
+function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
     const { theme, toggleTheme, isDark } = useTheme();
 
@@ -105,8 +105,8 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0 }) {
                 </ul>
             </nav>
 
-            {/* Footer with Theme Toggle */}
-            <div className="p-4 border-t border-subtle">
+            {/* Footer with Theme Toggle and Logout */}
+            <div className="p-4 border-t border-subtle space-y-2">
                 {/* Theme Toggle Button */}
                 <button
                     onClick={toggleTheme}
@@ -119,6 +119,22 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0 }) {
                     <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 ml-0 opacity-0' : 'w-auto ml-3 opacity-100'}`}>
                         <span className="font-code font-medium text-sm tracking-wide whitespace-nowrap">
                             {isDark ? 'Light Mode' : 'Dark Mode'}
+                        </span>
+                    </div>
+                </button>
+
+                {/* Logout Button */}
+                <button
+                    onClick={onLogout}
+                    className="w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer text-secondary hover:bg-accent/10 hover:text-accent"
+                    title="Sign Out"
+                >
+                    <div className="w-5 shrink-0 flex items-center justify-center">
+                        <LogOut size={20} />
+                    </div>
+                    <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 ml-0 opacity-0' : 'w-auto ml-3 opacity-100'}`}>
+                        <span className="font-code font-medium text-sm tracking-wide whitespace-nowrap">
+                            Sign Out
                         </span>
                     </div>
                 </button>
