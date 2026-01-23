@@ -690,7 +690,7 @@ function JobDetails({
     return (
         <div className="h-full flex flex-col glass">
             {/* Header */}
-            <div className="glass-elevated px-6 py-4 border-b border-subtle shrink-0">
+            <div className="glass-elevated px-6 py-4 border-b border-subtle shrink-0 relative z-30">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <button
@@ -801,7 +801,7 @@ function JobDetails({
                                     </button>
 
                                     {showActionsMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 glass-elevated rounded-xl border border-subtle py-1 z-50">
+                                        <div className="absolute right-0 top-full mt-2 w-48 dropdown-menu rounded-xl py-1 z-[100]">
                                             {!isConfirmedStage && !isDoneStage && (
                                                 <button
                                                     onClick={() => {
