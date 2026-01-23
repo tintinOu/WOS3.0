@@ -72,10 +72,12 @@ const DashboardCaseRow = ({ job, onSelectJob, getStageBadge }) => {
     const getTypeColor = (type) => {
         const safeType = (type || '').trim();
         switch (safeType) {
-            case 'Repair': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-            case 'Replace': return 'bg-accent/20 text-accent border-accent/30';
-            case 'Blend': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-            default: return 'bg-surface text-secondary border-subtle';
+            case 'Repair': return 'badge-repair';
+            case 'Replace': return 'badge-replace';
+            case 'Blend': return 'badge-blend';
+            case 'Polish/Touch up': return 'badge-other';
+            case 'Other': return 'badge-other';
+            default: return 'badge-base surface border border-subtle text-secondary';
         }
     };
 
@@ -184,7 +186,7 @@ const DashboardCaseRow = ({ job, onSelectJob, getStageBadge }) => {
                                         <span className="text-muted mt-1.5">•</span>
                                         <div className="flex items-baseline gap-2">
                                             {item.type && (
-                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border whitespace-nowrap ${getTypeColor(item.type)}`}>
+                                                <span className={`badge-base ${getTypeColor(item.type)}`}>
                                                     {item.type}
                                                 </span>
                                             )}
@@ -228,6 +230,12 @@ function Dashboard({
 
     // Calendar View State
     const [viewMode, setViewMode] = useState(defaultViewMode); // 'list' or 'calendar'
+
+    // Update view mode when prop changes (e.g. sidebar navigation)
+    useEffect(() => {
+        setViewMode(defaultViewMode);
+    }, [defaultViewMode]);
+
     const [calendarDate, setCalendarDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(null);
 

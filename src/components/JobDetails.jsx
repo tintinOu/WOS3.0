@@ -1433,10 +1433,10 @@ function JobDetails({
                                             value={formatDateRange()}
                                             placeholder="Select Date Range..."
                                             className={`w-full mt-1 uppercase text-center rounded-lg border-2 py-2.5 px-4 outline-none transition-all text-sm font-bold
-                                                ${canEditFields ? 'cursor-pointer hover:border-gray-300' : 'cursor-not-allowed bg-gray-50'}
+                                                ${canEditFields ? 'cursor-pointer hover:border-subtle' : 'cursor-not-allowed surface'}
                                                 ${(job.start_date && job.end_date)
-                                                    ? 'bg-blue-50 border-blue-200 text-blue-900'
-                                                    : 'bg-gray-50 border-dashed border-gray-300 text-gray-400'}`}
+                                                    ? 'bg-blue-500/20 border-blue-400/30 text-blue-300'
+                                                    : 'surface border-dashed border-subtle text-muted'}`}
                                         />
                                         {job.start_date && job.end_date && (
                                             <p className="text-[10px] text-center text-blue-600 font-bold mt-1">
@@ -1642,7 +1642,7 @@ function JobDetails({
                                                     }}
                                                     placeholder="Additional rental notes..."
                                                     rows={2}
-                                                    className="w-full mt-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none resize-none"
+                                                    className="w-full mt-1 px-3 py-2 surface text-primary border border-subtle rounded-lg text-sm focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none resize-none"
                                                 />
                                             </div>
                                         ) : job.rental_notes ? (
