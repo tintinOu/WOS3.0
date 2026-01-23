@@ -502,40 +502,40 @@ export default function InsuranceAssist() {
 
             {/* Create Case Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md">
-                    <div className="w-full max-w-md bg-gray-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md animate-fade-in">
+                    <div className="w-full max-w-md surface-modal rounded-3xl overflow-hidden animate-slide-up">
                         <div className="p-8">
                             <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                                <h3 className="text-xl font-bold text-primary flex items-center gap-3">
                                     <FileArchive className="text-accent" />
                                     New Case
                                 </h3>
-                                <button onClick={() => { setIsCreateModalOpen(false); setPendingPhotos([]); }} className="text-gray-400 hover:text-white transition-colors">
+                                <button onClick={() => { setIsCreateModalOpen(false); setPendingPhotos([]); }} className="text-muted hover:text-primary transition-colors">
                                     <X size={24} />
                                 </button>
                             </div>
 
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Case Name *</label>
+                                    <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3">Case Name *</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. John Smith - Rear Bumper"
                                         value={newCaseName}
                                         onChange={(e) => setNewCaseName(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-accent transition-all font-bold placeholder:font-normal placeholder:text-gray-500"
+                                        className="w-full surface-input rounded-2xl p-4 outline-none focus:border-accent transition-all font-bold placeholder:font-normal placeholder:text-muted"
                                         autoFocus
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Photos (Optional)</label>
+                                    <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3">Photos (Optional)</label>
                                     <div
                                         onClick={() => createFileInputRef.current?.click()}
-                                        className="border-2 border-dashed border-white/10 rounded-2xl p-6 text-center cursor-pointer hover:border-accent/50 transition-colors"
+                                        className="border-2 border-dashed border-subtle rounded-2xl p-6 text-center cursor-pointer hover:border-accent/50 transition-colors"
                                     >
-                                        <ImagePlus className="mx-auto text-gray-500 mb-3" size={32} />
-                                        <p className="text-sm text-gray-400">Tap to select photos from library</p>
+                                        <ImagePlus className="mx-auto text-muted mb-3" size={32} />
+                                        <p className="text-sm text-secondary">Tap to select photos from library</p>
                                     </div>
                                     <input
                                         type="file"
@@ -547,6 +547,7 @@ export default function InsuranceAssist() {
                                     />
 
                                     {pendingPhotos.length > 0 && (
+
                                         <div className="mt-4 flex flex-wrap gap-2">
                                             {pendingPhotos.map((file, idx) => (
                                                 <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
@@ -603,42 +604,45 @@ export default function InsuranceAssist() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Photo Enlargement Modal */}
-            {enlargedPhoto && (
-                <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg"
-                    onClick={() => setEnlargedPhoto(null)}
-                >
-                    <div className="relative max-w-5xl max-h-[90vh] w-full">
-                        <button
-                            onClick={() => setEnlargedPhoto(null)}
-                            className="absolute top-4 right-4 z-10 p-3 bg-black/60 text-white rounded-full hover:bg-accent transition-colors"
-                        >
-                            <X size={24} />
-                        </button>
-
-                        <img
-                            src={enlargedPhoto.url}
-                            alt={enlargedPhoto.name}
-                            className="w-full h-full object-contain rounded-2xl"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl px-4 py-3">
-                            <span className="text-white font-bold text-sm truncate">{enlargedPhoto.name}</span>
+            {
+                enlargedPhoto && (
+                    <div
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg"
+                        onClick={() => setEnlargedPhoto(null)}
+                    >
+                        <div className="relative max-w-5xl max-h-[90vh] w-full">
                             <button
-                                onClick={(e) => { e.stopPropagation(); handleDownloadPhoto(enlargedPhoto, e); }}
-                                className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-colors"
+                                onClick={() => setEnlargedPhoto(null)}
+                                className="absolute top-4 right-4 z-10 p-3 bg-black/60 text-white rounded-full hover:bg-accent transition-colors"
                             >
-                                <Download size={14} />
-                                <span>Download</span>
+                                <X size={24} />
                             </button>
+
+                            <img
+                                src={enlargedPhoto.url}
+                                alt={enlargedPhoto.name}
+                                className="w-full h-full object-contain rounded-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl px-4 py-3">
+                                <span className="text-white font-bold text-sm truncate">{enlargedPhoto.name}</span>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleDownloadPhoto(enlargedPhoto, e); }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-colors"
+                                >
+                                    <Download size={14} />
+                                    <span>Download</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

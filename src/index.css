@@ -30,6 +30,11 @@
     --color-border: rgba(255, 255, 255, 0.08);
     --color-border-hover: rgba(255, 255, 255, 0.15);
 
+    /* Cards and Modals for Dark Mode */
+    --color-surface-card: rgba(255, 255, 255, 0.04);
+    --color-surface-modal: #1A1A1A;
+    --color-surface-input: rgba(255, 255, 255, 0.06);
+
     /* Effects */
     --glass-blur: 20px;
     --glass-border: 1px solid rgba(255, 255, 255, 0.1);
@@ -57,29 +62,34 @@
 
 /* === LIGHT MODE === */
 .light {
-    --color-bg: #FAFAFA;
+    --color-bg: #F8FAFC;
     --color-surface: rgba(0, 0, 0, 0.02);
     --color-surface-elevated: rgba(0, 0, 0, 0.04);
     --color-surface-hover: rgba(0, 0, 0, 0.06);
 
-    --color-text: #0A0A0A;
-    --color-text-secondary: rgba(0, 0, 0, 0.7);
-    --color-text-muted: rgba(0, 0, 0, 0.4);
+    --color-text: #0F172A;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94A3B8;
 
     --color-accent: #DC2626;
     --color-accent-hover: #B91C1C;
-    --color-accent-glow: rgba(220, 38, 38, 0.2);
+    --color-accent-glow: rgba(220, 38, 38, 0.15);
 
     --color-border: rgba(0, 0, 0, 0.08);
     --color-border-hover: rgba(0, 0, 0, 0.15);
 
-    --glass-border: 1px solid rgba(0, 0, 0, 0.08);
-    --shadow-glow: 0 0 30px rgba(220, 38, 38, 0.15);
+    /* Cards and Modals for Light Mode */
+    --color-surface-card: #FFFFFF;
+    --color-surface-modal: #FFFFFF;
+    --color-surface-input: #F1F5F9;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 30px rgba(220, 38, 38, 0.1);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================
@@ -244,6 +254,31 @@ h6 {
 
     .bg-accent {
         background: var(--color-accent);
+    }
+
+    /* Theme-aware card/modal backgrounds */
+    .surface-card {
+        background: var(--color-surface-card);
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-md);
+    }
+
+    .surface-modal {
+        background: var(--color-surface-modal);
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .surface-input {
+        background: var(--color-surface-input);
+        border: 1px solid var(--color-border);
+        color: var(--color-text);
+    }
+
+    .surface-input:focus {
+        border-color: var(--color-accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--color-accent-glow);
     }
 
     /* Border Utilities */

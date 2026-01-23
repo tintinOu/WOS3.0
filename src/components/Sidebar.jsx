@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon, ShieldCheck, LogOut } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 /**
  * Sidebar - Glassmorphism Design System
- * Features: Dark/Light mode toggle, Red accent active states
+ * Features: Dark/Light mode toggle, Red accent active states, click-outside to collapse
  * Following ui-ux-pro-max workflow guidelines
  */
 function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
     const { theme, toggleTheme, isDark } = useTheme();
+
+    // Auto-collapse when clicking outside (only when sidebar is expanded)
+    const handleClickOutside = useCallback(() => {
+        if (!collapsed) {
+            setCollapsed(true);
+        }
+    }, [collapsed]);
+
+    const sidebarRef = useClickOutside(handleClickOutside, !collapsed);
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: Home, badge: null },
@@ -26,6 +36,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
 
     return (
         <div
+            ref={sidebarRef}
             className={`h-full glass-elevated flex flex-col transition-all duration-300 ease-out overflow-hidden ${collapsed ? 'w-20' : 'w-64'}`}
         >
             {/* Logo / Header */}
