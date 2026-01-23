@@ -734,7 +734,7 @@ function Dashboard({
     return (
         <div className="h-full flex flex-col bg-bg">
             {/* Header */}
-            <div className="glass-elevated px-8 py-6 border-b border-subtle shrink-0 relative z-20">
+            <div className="glass-elevated px-6 py-4 border-b border-subtle shrink-0 relative z-20">
                 <div className="flex items-center justify-between gap-6 mb-4">
                     <div className="shrink-0">
                         <h1 className="font-code text-2xl font-bold text-primary tracking-tight">Dashboard</h1>

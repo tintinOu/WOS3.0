@@ -34,6 +34,9 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
 
     return (
         <>
+            {/* Placeholder to reserve space in flex layout - ALWAYS w-20 to prevent layout shift */}
+            <div className="w-20 shrink-0 h-full" aria-hidden="true" />
+
             {/* Overlay backdrop when sidebar is expanded */}
             {!collapsed && (
                 <div
@@ -43,7 +46,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
             )}
             <div
                 ref={sidebarRef}
-                className={`h-full glass-elevated flex flex-col transition-all duration-300 ease-out overflow-hidden shrink-0 ${collapsed ? 'w-20 relative' : 'w-64 fixed left-0 top-0 z-50 shadow-2xl'}`}
+                className={`h-full glass-elevated flex flex-col transition-all duration-300 ease-out overflow-hidden fixed top-0 left-0 z-50 shadow-2xl ${collapsed ? 'w-20' : 'w-64'}`}
             >
                 {/* Logo / Header */}
                 <div className="p-6 border-b border-subtle flex items-center justify-between min-h-[88px]">
@@ -74,7 +77,10 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
                             return (
                                 <li key={item.id} className="relative group">
                                     <button
-                                        onClick={() => onViewChange(item.id)}
+                                        onClick={() => {
+                                            onViewChange(item.id);
+                                            setCollapsed(true);
+                                        }}
                                         className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'px-4'} py-3 rounded-xl transition-all duration-300 ease-out cursor-pointer ${isActive
                                             ? 'bg-accent text-white shadow-lg shadow-accent/30'
                                             : 'text-secondary hover:bg-surface-hover hover:text-primary'
