@@ -93,7 +93,7 @@ const DashboardCaseRow = ({ job, onSelectJob, getStageBadge }) => {
                         <p className="font-code font-bold text-primary text-base flex items-center gap-2">
                             {job.vehicle_year} {job.vehicle_make_model}
                             {job.vehicle_plate && (
-                                <span className="font-code text-xs bg-surface px-2 py-0.5 rounded text-secondary border border-subtle">
+                                <span className="license-plate">
                                     {job.vehicle_plate}
                                 </span>
                             )}
@@ -135,7 +135,7 @@ const DashboardCaseRow = ({ job, onSelectJob, getStageBadge }) => {
                             <button
                                 onClick={() => url && window.open(url, '_blank')}
                                 disabled={loading}
-                                className="p-2 text-muted hover:text-white hover:bg-surface-hover rounded-lg transition-colors"
+                                className="p-2 text-white hover:text-accent hover:bg-surface-hover rounded-lg transition-colors"
                                 title="Work Order"
                             >
                                 <ClipboardList size={18} />
@@ -731,7 +731,7 @@ function Dashboard({
                     <div className="shrink-0">
                         <h1 className="font-code text-2xl font-bold text-primary tracking-tight">Dashboard</h1>
                         <p className="text-sm text-muted mt-1">
-                            Welcome back. Here's your shop overview.
+                            Welcome Back, Today is {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', weekday: 'long' }).replace(/^(\d{2}\/(\d{2})\/\d{4}), (.+)$/, '$1 $3').toUpperCase()}
                         </p>
                     </div>
 
@@ -752,7 +752,7 @@ function Dashboard({
                         <div className="relative" ref={notificationRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className={`relative p-3 rounded-2xl transition-all ${notifications.length > 0 ? 'bg-accent/20 text-accent hover:bg-accent/30' : 'surface text-muted hover:text-white'}`}
+                                className={`relative p-3 rounded-2xl transition-all surface border border-subtle ${notifications.length > 0 ? 'text-accent hover:bg-accent/10' : 'text-muted hover:text-white hover:bg-surface-hover'}`}
                                 title="Notifications"
                             >
                                 <Bell size={18} />
@@ -765,7 +765,7 @@ function Dashboard({
 
                             {/* Notification Dropdown */}
                             {showNotifications && (
-                                <div className="absolute right-0 top-full mt-2 w-96 bg-black/80 backdrop-blur-xl rounded-2xl border border-subtle overflow-hidden z-50">
+                                <div className="absolute right-0 top-full mt-2 w-96 dropdown-menu rounded-2xl overflow-hidden z-50">
                                     <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Bell size={16} className="text-muted" />
@@ -853,7 +853,7 @@ function Dashboard({
 
                             {/* New Case Dropdown */}
                             {showNewCaseMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-56 bg-black/80 backdrop-blur-xl border border-subtle rounded-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute right-0 top-full mt-2 w-56 dropdown-menu rounded-2xl overflow-hidden z-50">
                                     <button
                                         onClick={() => {
                                             onCreateJob();

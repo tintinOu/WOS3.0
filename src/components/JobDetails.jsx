@@ -605,39 +605,39 @@ function JobDetails({
 
         const getPartStatus = (part) => {
             // Check individual status first, then fall back to global flags
-            if (part.arrived || job.parts_arrived) return { label: 'Arrived', color: 'text-green-600 bg-green-50', icon: CheckCircle };
-            if (part.ordered || job.parts_ordered) return { label: 'Ordered', color: 'text-yellow-600 bg-yellow-50', icon: Clock };
-            return { label: 'Not Ordered', color: 'text-gray-500 bg-gray-50', icon: Package };
+            if (part.arrived || job.parts_arrived) return { label: 'Arrived', color: 'text-green-400 bg-green-500/20', icon: CheckCircle };
+            if (part.ordered || job.parts_ordered) return { label: 'Ordered', color: 'text-yellow-400 bg-yellow-500/20', icon: Clock };
+            return { label: 'Not Ordered', color: 'text-muted surface', icon: Package };
         };
 
         if (totalParts === 0) return null;
 
         return (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+            <div className="glass-elevated rounded-2xl border border-subtle overflow-hidden mb-6">
                 {/* Header - Clickable to expand */}
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className={`w-full flex items-center justify-between p-4 transition-colors ${allArrived ? 'bg-green-50 hover:bg-green-100' : 'bg-amber-50 hover:bg-amber-100'
+                    className={`w-full flex items-center justify-between p-4 transition-colors ${allArrived ? 'bg-green-500/10 hover:bg-green-500/20' : 'bg-orange-500/10 hover:bg-orange-500/20'
                         }`}
                 >
                     <div className="flex items-center gap-3">
                         {allArrived ? (
-                            <CheckCircle size={20} className="text-green-600" />
+                            <CheckCircle size={20} className="text-green-400" />
                         ) : (
-                            <AlertTriangle size={20} className="text-amber-600" />
+                            <AlertTriangle size={20} className="text-orange-400" />
                         )}
-                        <span className={`font-bold ${allArrived ? 'text-green-700' : 'text-amber-700'
+                        <span className={`font-bold ${allArrived ? 'text-green-400' : 'text-orange-400'
                             }`}>
                             {allArrived ? 'All Parts Arrived!' : 'Missing Few Parts'}
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${allArrived ? 'bg-green-200 text-green-700' : 'bg-amber-200 text-amber-700'
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${allArrived ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'
                             }`}>
                             {arrivedCount}/{totalParts}
                         </span>
                     </div>
                     <ChevronDown
                         size={20}
-                        className={`transition-transform duration-200 ${allArrived ? 'text-green-600' : 'text-amber-600'
+                        className={`transition-transform duration-200 ${allArrived ? 'text-green-400' : 'text-orange-400'
                             } ${isExpanded ? 'rotate-180' : ''}`}
                     />
                 </button>
@@ -648,7 +648,7 @@ function JobDetails({
                         }`}
                 >
                     <div className="overflow-hidden">
-                        <div className="border-t border-gray-100 divide-y divide-gray-100">
+                        <div className="border-t border-subtle divide-y divide-subtle">
                             {partsToOrder.map((part, idx) => {
                                 const status = getPartStatus(part);
                                 const StatusIcon = status.icon;
@@ -657,9 +657,9 @@ function JobDetails({
                                     <button
                                         key={idx}
                                         onClick={() => togglePartStatus(part.originalIndex)}
-                                        className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors text-left"
+                                        className="w-full flex items-center justify-between p-3 hover:bg-surface-hover transition-colors text-left"
                                     >
-                                        <span className="text-sm text-gray-700 truncate flex-1">
+                                        <span className="text-sm text-secondary truncate flex-1">
                                             {part.desc || 'Unknown part'}
                                         </span>
                                         <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
@@ -995,7 +995,7 @@ function JobDetails({
                                             <EditableField label="Customer Name" field="customer_name" value={job.customer_name} />
                                             <EditableField label="Phone" field="customer_phone" value={job.customer_phone} type="tel" />
 
-                                            <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                                            <div className="col-span-2 border-t border-subtle pt-4 mt-2">
                                                 <div className="grid grid-cols-3 gap-2">
                                                     <EditableField label="Year" field="vehicle_year" value={job.vehicle_year} />
                                                     <div className="col-span-2">
@@ -1008,8 +1008,8 @@ function JobDetails({
                                             <EditableField label="VIN" field="vehicle_vin" value={job.vehicle_vin} mono uppercase />
 
                                             {/* Schedule */}
-                                            <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
-                                                <label className="text-[10px] font-bold text-gray-400 uppercase">Schedule</label>
+                                            <div className="col-span-2 border-t border-subtle pt-4 mt-2">
+                                                <label className="text-[10px] font-bold text-muted uppercase">Schedule</label>
                                                 <input
                                                     ref={dateRangeRef}
                                                     type="text"
@@ -2075,39 +2075,22 @@ function JobDetails({
                             </Container>
                         )}
 
-                        {/* Special Instructions - Show for all stages */}
                         {(job.notes || true) && (
                             <Container
                                 title="Special Instructions"
                                 icon={FileText}
-                                badge={
-                                    <button
-                                        onClick={() => setIsEditingNotes(!isEditingNotes)}
-                                        className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold font-code rounded-lg transition-colors ${isEditingNotes
-                                            ? 'text-muted surface border border-subtle hover:bg-white/5'
-                                            : 'text-accent bg-accent/20 border border-accent/30 hover:bg-accent/30'
-                                            }`}
-                                    >
-                                        {isEditingNotes ? <X size={12} /> : <Edit3 size={12} />}
-                                        {isEditingNotes ? 'Done' : 'Edit'}
-                                    </button>
-                                }
                             >
-                                {isEditingNotes || canEditFields ? (
-                                    <textarea
-                                        key={`${job.id}-notes`}
-                                        defaultValue={job.notes || ''}
-                                        onBlur={(e) => {
-                                            if (e.target.value !== (job.notes || '')) {
-                                                onUpdate(job.id, { notes: e.target.value });
-                                            }
-                                        }}
-                                        className="w-full h-24 px-3 py-2 surface border border-subtle rounded-lg text-sm text-primary focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none resize-none placeholder-muted"
-                                        placeholder="Add notes..."
-                                    />
-                                ) : (
-                                    <p className="text-sm text-secondary whitespace-pre-wrap">{job.notes || 'No special instructions'}</p>
-                                )}
+                                <textarea
+                                    key={`${job.id}-notes`}
+                                    defaultValue={job.notes || ''}
+                                    onBlur={(e) => {
+                                        if (e.target.value !== (job.notes || '')) {
+                                            onUpdate(job.id, { notes: e.target.value });
+                                        }
+                                    }}
+                                    className="w-full h-24 px-3 py-2 surface border border-subtle rounded-lg text-sm text-primary focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none resize-none placeholder-muted"
+                                    placeholder="Add notes..."
+                                />
                             </Container>
                         )}
                     </div>
@@ -2131,7 +2114,7 @@ function JobDetails({
                                 </div>
                                 {/* Add Note Input */}
                                 {showTimelineNote && (
-                                    <div className="px-5 py-3 border-b border-subtle bg-yellow-500/10">
+                                    <div className="px-5 py-3 border-b border-subtle surface">
                                         <textarea
                                             value={timelineNoteText}
                                             onChange={(e) => setTimelineNoteText(e.target.value)}
@@ -2287,14 +2270,14 @@ function JobDetails({
             {/* Done Stage - Full screen overlay-style message */}
             {
                 isDoneStage && (
-                    <div className="bg-green-50 border-t border-green-200 px-6 py-4 shrink-0">
+                    <div className="surface border-t border-subtle px-6 py-4 shrink-0">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <CheckCircle size={24} className="text-green-600" />
+                                <CheckCircle size={24} className="text-green-400" />
                                 <div>
-                                    <p className="font-bold text-green-800">Case Completed!</p>
+                                    <p className="font-bold text-green-400">Case Completed!</p>
                                     {job.timeline && job.timeline.length > 0 && (
-                                        <p className="text-xs text-green-600">
+                                        <p className="text-xs text-muted">
                                             Completed: {formatTimelineDate(job.timeline[job.timeline.length - 1]?.timestamp)}
                                         </p>
                                     )}
@@ -2302,7 +2285,7 @@ function JobDetails({
                             </div>
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
-                                className="flex items-center gap-2 px-4 py-2 text-red-600 text-xs font-bold uppercase rounded-lg border border-red-200 hover:bg-red-50 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-accent text-xs font-bold uppercase rounded-lg border border-accent/30 hover:bg-accent/10 transition-colors"
                             >
                                 <Trash2 size={14} />
                                 Delete Case
@@ -2315,30 +2298,30 @@ function JobDetails({
             {/* Delete Confirmation Modal */}
             {
                 showDeleteConfirm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                        <div className="surface-modal rounded-2xl shadow-2xl w-full max-w-md p-6 animate-slide-up">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                    <AlertCircle size={24} className="text-red-600" />
+                                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                                    <AlertCircle size={24} className="text-accent" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Delete Case?</h3>
-                                    <p className="text-sm text-gray-500">This cannot be undone</p>
+                                    <h3 className="text-lg font-bold text-primary">Delete Case?</h3>
+                                    <p className="text-sm text-muted">This cannot be undone</p>
                                 </div>
                             </div>
-                            <p className="text-sm text-gray-600 mb-6">
-                                Are you sure you want to delete this case for <strong>{job.customer_name}</strong>?
+                            <p className="text-sm text-secondary mb-6">
+                                Are you sure you want to delete this case for <strong className="text-primary">{job.customer_name}</strong>?
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 py-3 text-sm font-bold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50"
+                                    className="flex-1 py-3 text-sm font-bold text-secondary surface border border-subtle rounded-xl hover:bg-surface-hover transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    className="flex-1 py-3 text-sm font-bold text-white bg-red-600 rounded-xl hover:bg-red-700"
+                                    className="flex-1 py-3 text-sm font-bold text-white bg-accent rounded-xl hover:bg-accent/80 transition-colors"
                                 >
                                     Delete Case
                                 </button>
@@ -2351,24 +2334,24 @@ function JobDetails({
             {/* Confirmation Modal for Advancing Stage */}
             {
                 showConfirmModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-                            <div className="bg-yellow-50 px-6 py-4 border-b border-yellow-200">
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60]">
+                        <div className="surface-modal rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-slide-up">
+                            <div className="surface px-6 py-4 border-b border-subtle">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-yellow-100 rounded-full">
-                                        <AlertTriangle size={24} className="text-yellow-600" />
+                                    <div className="p-2 bg-yellow-500/20 rounded-full">
+                                        <AlertTriangle size={24} className="text-yellow-400" />
                                     </div>
-                                    <h3 className="text-lg font-bold text-yellow-800">Incomplete Items</h3>
+                                    <h3 className="text-lg font-bold text-primary">Incomplete Items</h3>
                                 </div>
                             </div>
                             <div className="p-6">
-                                <p className="text-sm text-gray-600 mb-4">
+                                <p className="text-sm text-secondary mb-4">
                                     The following items are not complete. Are you sure you want to proceed?
                                 </p>
                                 <ul className="space-y-2 mb-6">
                                     {confirmWarnings.map((warning, idx) => (
-                                        <li key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                                            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full shrink-0"></span>
+                                        <li key={idx} className="flex items-center gap-2 text-sm text-secondary">
+                                            <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full shrink-0"></span>
                                             {warning}
                                         </li>
                                     ))}
@@ -2376,13 +2359,13 @@ function JobDetails({
                                 <div className="flex gap-3">
                                     <button
                                         onClick={cancelAdvanceStage}
-                                        className="flex-1 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                        className="flex-1 py-2.5 text-sm font-bold text-secondary surface border border-subtle rounded-xl hover:bg-surface-hover transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={confirmAdvanceStage}
-                                        className="flex-1 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors"
+                                        className="flex-1 py-2.5 text-sm font-bold text-white bg-accent rounded-xl hover:bg-accent/80 transition-colors"
                                     >
                                         Proceed Anyway
                                     </button>
@@ -2436,7 +2419,7 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
 
     return (
         <div className="group flex items-start gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400 mt-2 select-none shrink-0">
+            <div className="w-7 h-7 rounded-lg surface flex items-center justify-center text-[10px] font-bold text-muted mt-2 select-none shrink-0">
                 {(index + 1).toString().padStart(2, '0')}
             </div>
             <div className="flex flex-col gap-2">
@@ -2446,7 +2429,7 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
                         setType(e.target.value);
                         handleBlur('type', e.target.value);
                     }}
-                    className="w-28 bg-gray-50 text-gray-900 text-xs font-bold uppercase rounded-lg border-2 border-transparent focus:border-blue-200 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all py-2.5 px-3 outline-none cursor-pointer"
+                    className="w-28 surface text-primary text-xs font-bold uppercase rounded-lg border border-subtle focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all py-2.5 px-3 outline-none cursor-pointer"
                 >
                     <option value="Repair">Repair</option>
                     <option value="Replace">Replace</option>
@@ -2460,7 +2443,7 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
                         value={customTitle}
                         onChange={(e) => setCustomTitle(e.target.value)}
                         onBlur={(e) => handleBlur('customTitle', e.target.value)}
-                        className="w-28 bg-gray-50 text-gray-900 text-[10px] font-bold uppercase rounded-lg border-2 border-transparent focus:border-blue-200 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all py-2 px-3 outline-none placeholder-gray-400"
+                        className="w-28 surface text-primary text-[10px] font-bold uppercase rounded-lg border border-subtle focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all py-2 px-3 outline-none placeholder-muted"
                         placeholder="Title"
                     />
                 )}
@@ -2470,7 +2453,7 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
                 value={desc}
                 onChange={(e) => setDesc(e.target.value.toUpperCase())}
                 onBlur={(e) => handleBlur('desc', e.target.value)}
-                className="flex-1 bg-gray-50 text-gray-900 font-bold rounded-lg border-2 border-transparent focus:border-blue-200 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all py-2.5 px-4 outline-none uppercase placeholder-gray-300 text-sm"
+                className="flex-1 surface text-primary font-bold rounded-lg border border-subtle focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all py-2.5 px-4 outline-none uppercase placeholder-muted text-sm"
                 placeholder="Description of work..."
             />
             <input
@@ -2478,12 +2461,12 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
                 value={partNum}
                 onChange={(e) => setPartNum(e.target.value.toUpperCase())}
                 onBlur={(e) => handleBlur('partNum', e.target.value)}
-                className="w-28 bg-gray-50 text-gray-900 font-mono text-xs rounded-lg border-2 border-transparent focus:border-blue-200 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all py-2.5 px-3 outline-none uppercase placeholder-gray-300"
+                className="w-28 surface text-primary font-mono text-xs rounded-lg border border-subtle focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all py-2.5 px-3 outline-none uppercase placeholder-muted"
                 placeholder="P/N"
             />
             <button
                 onClick={() => onDelete(index)}
-                className="h-[42px] w-[42px] rounded-lg bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center shrink-0"
+                className="h-[42px] w-[42px] rounded-lg surface text-muted hover:bg-accent/20 hover:text-accent transition-all flex items-center justify-center shrink-0"
                 title="Delete item"
             >
                 <X size={16} />

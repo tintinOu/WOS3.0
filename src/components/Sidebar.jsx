@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, ShieldCheck, LogOut } from 'lucide-react';
 import { useClickOutside } from '../hooks/useClickOutside';
 
@@ -41,10 +41,10 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
             <div className="p-6 border-b border-subtle flex items-center justify-between min-h-[88px]">
                 <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                     <h2 className="font-code text-lg font-bold uppercase tracking-wider text-primary whitespace-nowrap">
-                        311 Auto
+                        311 Auto Body
                     </h2>
                     <p className="text-[10px] text-muted font-medium uppercase tracking-[0.2em] mt-1 whitespace-nowrap">
-                        Work Order System
+                        Work Operations System
                     </p>
                 </div>
                 <button
@@ -58,8 +58,8 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
 
             {/* Navigation */}
             <nav className="flex-1 p-4">
-                <ul className="space-y-2">
-                    {navItems.map((item) => {
+                <ul className="space-y-2 relative">
+                    {navItems.map((item, index) => {
                         const Icon = item.icon;
                         const isActive = activeView === item.id;
 
@@ -67,12 +67,12 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
                             <li key={item.id} className="relative group">
                                 <button
                                     onClick={() => onViewChange(item.id)}
-                                    className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer ${isActive
+                                    className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'px-4'} py-3 rounded-xl transition-all duration-300 ease-out cursor-pointer ${isActive
                                         ? 'bg-accent text-white shadow-lg shadow-accent/30'
                                         : 'text-secondary hover:bg-surface-hover hover:text-primary'
                                         }`}
                                 >
-                                    <div className="w-5 shrink-0 flex items-center justify-center">
+                                    <div className={`${collapsed ? 'w-12 h-12' : 'w-5'} shrink-0 flex items-center justify-center transition-all duration-300`}>
                                         <Icon size={20} className={isActive ? 'text-white' : ''} />
                                     </div>
                                     <div className={`overflow-hidden transition-all duration-300 flex items-center ${collapsed ? 'w-0 ml-0 opacity-0' : 'w-auto ml-3 opacity-100'}`}>
@@ -127,7 +127,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
 
                 <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'h-0 opacity-0' : 'h-auto opacity-100 mt-4'}`}>
                     <p className="text-[10px] text-muted font-medium text-center uppercase tracking-widest whitespace-nowrap">
-                        v2.1.0 • Dark Mode
+                        V3.0.5
                     </p>
                 </div>
             </div>
