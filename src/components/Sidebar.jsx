@@ -1,16 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, Sun, Moon, ShieldCheck, LogOut } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { Home, Calendar, Settings, ChevronLeft, ChevronRight, Wrench, ShieldCheck, LogOut } from 'lucide-react';
 import { useClickOutside } from '../hooks/useClickOutside';
 
 /**
  * Sidebar - Glassmorphism Design System
- * Features: Dark/Light mode toggle, Red accent active states, click-outside to collapse
- * Following ui-ux-pro-max workflow guidelines
+ * Features: Red accent active states, click-outside to collapse
+ * Dark mode only
  */
 function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
-    const { theme, toggleTheme, isDark } = useTheme();
 
     // Auto-collapse when clicking outside (only when sidebar is expanded)
     const handleClickOutside = useCallback(() => {
@@ -82,7 +80,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
                                             {item.label}
                                         </span>
                                         {item.badge && (
-                                            <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${isActive
+                                            <span className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive
                                                 ? 'bg-white/20 text-white'
                                                 : 'bg-accent text-white'
                                                 }`}>
@@ -91,13 +89,6 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
                                         )}
                                     </div>
                                 </button>
-
-                                {/* Collapsed Badge */}
-                                {collapsed && item.badge && (
-                                    <span className="absolute -top-1 -right-1 text-[9px] font-bold bg-accent text-white w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-accent/30">
-                                        {item.badge > 9 ? '9+' : item.badge}
-                                    </span>
-                                )}
 
                                 {/* Tooltip for collapsed state */}
                                 {collapsed && (
@@ -116,24 +107,8 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
                 </ul>
             </nav>
 
-            {/* Footer with Theme Toggle and Logout */}
+            {/* Footer with Logout */}
             <div className="p-4 border-t border-subtle space-y-2">
-                {/* Theme Toggle Button */}
-                <button
-                    onClick={toggleTheme}
-                    className="w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer text-secondary hover:bg-surface-hover hover:text-primary"
-                    title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                    <div className="w-5 shrink-0 flex items-center justify-center">
-                        {isDark ? <Sun size={20} /> : <Moon size={20} />}
-                    </div>
-                    <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 ml-0 opacity-0' : 'w-auto ml-3 opacity-100'}`}>
-                        <span className="font-code font-medium text-sm tracking-wide whitespace-nowrap">
-                            {isDark ? 'Light Mode' : 'Dark Mode'}
-                        </span>
-                    </div>
-                </button>
-
                 {/* Logout Button */}
                 <button
                     onClick={onLogout}
@@ -152,7 +127,7 @@ function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
 
                 <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'h-0 opacity-0' : 'h-auto opacity-100 mt-4'}`}>
                     <p className="text-[10px] text-muted font-medium text-center uppercase tracking-widest whitespace-nowrap">
-                        v2.1.0 • {isDark ? 'Dark' : 'Light'}
+                        v2.1.0 • Dark Mode
                     </p>
                 </div>
             </div>
