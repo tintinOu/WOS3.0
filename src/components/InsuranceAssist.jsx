@@ -182,22 +182,25 @@ export default function InsuranceAssist() {
         }
     };
 
-    // Download single photo
+    // Download single photo via backend proxy
     const handleDownloadPhoto = async (photo, e) => {
         e.stopPropagation();
         try {
-            // Use a proxy approach - open in new tab which will trigger download
-            const link = document.createElement('a');
-            link.href = photo.url;
-            link.download = photo.name;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const token = getAuthToken();
+            // Use backend proxy to download
+            const downloadUrl = `${API_URL}/insurance-cases/${selectedCase.id}/photos/${encodeURIComponent(photo.name)}/download`;
+
+            const response = await fetch(downloadUrl, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            saveAs(blob, photo.name);
         } catch (err) {
             console.error('Download error:', err);
-            // Fallback: open in new tab
-            window.open(photo.url, '_blank');
+            alert('Failed to download photo');
         }
     };
 
@@ -211,6 +214,7 @@ export default function InsuranceAssist() {
 
             const zip = new JSZip();
             const photosFolder = zip.folder(selectedCase.name);
+            const token = getAuthToken();
 
             for (let i = 0; i < selectedCase.photos.length; i++) {
                 const photo = selectedCase.photos[i];
@@ -218,21 +222,20 @@ export default function InsuranceAssist() {
                 setUploadStatus(`Fetching ${i + 1}/${selectedCase.photos.length}...`);
 
                 try {
-                    // Try fetching directly first
-                    const response = await fetch(photo.url, { mode: 'cors' });
+                    // Use backend proxy to fetch each photo
+                    const downloadUrl = `${API_URL}/insurance-cases/${selectedCase.id}/photos/${encodeURIComponent(photo.name)}/download`;
+                    const response = await fetch(downloadUrl, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
                     if (response.ok) {
                         const blob = await response.blob();
                         photosFolder.file(photo.name, blob);
                     } else {
-                        // If CORS fails, try fetching via image element
-                        const blob = await fetchImageAsBlob(photo.url);
-                        photosFolder.file(photo.name, blob);
+                        console.warn(`Failed to fetch ${photo.name}`);
                     }
                 } catch (fetchErr) {
-                    console.warn(`Failed to fetch ${photo.name}, trying alternative method...`);
-                    // Alternative: fetch via image element
-                    const blob = await fetchImageAsBlob(photo.url);
-                    photosFolder.file(photo.name, blob);
+                    console.warn(`Failed to fetch ${photo.name}: ${fetchErr.message}`);
                 }
             }
 
@@ -316,8 +319,8 @@ export default function InsuranceAssist() {
                             key={c.id}
                             onClick={() => handleCaseClick(c)}
                             className={`group flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-all ${selectedCase?.id === c.id
-                                    ? 'bg-accent/10 border-accent/30'
-                                    : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
+                                ? 'bg-accent/10 border-accent/30'
+                                : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
                                 }`}
                         >
                             <div className="flex-1 min-w-0">

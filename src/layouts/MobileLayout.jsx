@@ -4,7 +4,8 @@ import PDFOrder from '../components/PDFOrder';
 import JobsList from '../components/JobsList';
 import InsuranceAssist from '../components/InsuranceAssist';
 import { useJobs } from '../hooks/useJobs';
-import { X, Calendar, Printer, Sparkles, Check, Loader2, RotateCcw, ChevronDown, ChevronUp, FileText, Briefcase, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { X, Calendar, Printer, Sparkles, Check, Loader2, RotateCcw, ChevronDown, ChevronUp, FileText, Briefcase, ShieldCheck, LogOut } from 'lucide-react';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/dark.css';
@@ -44,6 +45,8 @@ function MobileLayout({ form }) {
         handleFileUpload,
         resetForm,
     } = form;
+
+    const { signOut } = useAuth();
 
     // Navigation state
     const [activeView, setActiveView] = useState('jobs');
@@ -469,6 +472,13 @@ function MobileLayout({ form }) {
                     >
                         <FileText size={20} />
                         <span className="text-[10px] font-bold uppercase">Work Order</span>
+                    </button>
+                    <button
+                        onClick={signOut}
+                        className="flex-1 flex flex-col items-center gap-1 py-3 transition-colors text-muted hover:text-accent"
+                    >
+                        <LogOut size={20} />
+                        <span className="text-[10px] font-bold uppercase">Logout</span>
                     </button>
                 </div>
             </nav>

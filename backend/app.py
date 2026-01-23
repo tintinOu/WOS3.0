@@ -517,6 +517,38 @@ def delete_existing_insurance_case(case_id):
         return jsonify({'error': 'Insurance case not found'}), 404
     return jsonify({'success': True})
 
+
+@app.route('/insurance-cases/<case_id>/photos/<photo_name>/download', methods=['GET'])
+@require_auth
+def download_insurance_photo(case_id, photo_name):
+    """Download a specific photo - proxies through backend to avoid CORS issues."""
+    from firebase_config import get_storage_bucket
+    from flask import Response
+    
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    
+    try:
+        bucket = get_storage_bucket()
+        blob = bucket.blob(f"insurance_photos/{case_id}/{photo_name}")
+        
+        if not blob.exists():
+            return jsonify({'error': 'Photo not found'}), 404
+        
+        # Download blob content
+        content = blob.download_as_bytes()
+        
+        # Return with download headers
+        response = Response(content, mimetype='image/jpeg')
+        response.headers['Content-Disposition'] = f'attachment; filename="{photo_name}"'
+        response.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+        return response
+        
+    except Exception as e:
+        print(f"Photo download error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint. Public."""
