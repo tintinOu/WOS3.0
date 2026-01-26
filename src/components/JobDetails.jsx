@@ -11,6 +11,8 @@ import { JOB_STAGES, STAGE_INFO, getPreparationPhase } from '../hooks/useJobs';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 /**
  * JobDetails component - Full page view with stage-based workflow
  */
@@ -27,6 +29,7 @@ function JobDetails({
     toggleRentalRequested,
     toggleCustomerNotified
 }) {
+    const { getAuthToken } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [editedJob, setEditedJob] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -485,7 +488,6 @@ function JobDetails({
 
     // File Car-In Button with loading states
     const FileCarInButton = ({ job, onUpdate }) => {
-        const { getAuthToken } = useAuth();
         const [status, setStatus] = useState('idle'); // idle, loading, success, failed
 
         // Check if already filed in (persisted in job data)
@@ -495,7 +497,6 @@ function JobDetails({
             if (status === 'loading' || alreadyFiled) return;
 
             setStatus('loading');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
             try {
                 const token = getAuthToken();
@@ -825,7 +826,6 @@ function JobDetails({
                                             <button
                                                 onClick={async () => {
                                                     setShowActionsMenu(false);
-                                                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
                                                     try {
                                                         const token = getAuthToken();
                                                         const response = await fetch(`${API_URL}/create-calendar-event`, {
