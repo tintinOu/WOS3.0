@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import {
     Plus,
     RefreshCw,
@@ -218,6 +219,7 @@ function Dashboard({
     onSelectJob,
     defaultViewMode = 'list'
 }) {
+    const { getAuthToken } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [showNotifications, setShowNotifications] = useState(false);
     const [showNewCaseMenu, setShowNewCaseMenu] = useState(false); // State for New Case Dropdown
@@ -908,9 +910,15 @@ function Dashboard({
                                         const formData = new FormData();
                                         formData.append('file', file);
 
+                                        // Get auth token for API calls
+                                        const token = getAuthToken();
+
                                         // 1. Analyze PDF
                                         const analyzeRes = await fetch(`${API_URL}/analyze`, {
                                             method: 'POST',
+                                            headers: {
+                                                'Authorization': `Bearer ${token}`
+                                            },
                                             body: formData,
                                         });
 
@@ -941,7 +949,10 @@ function Dashboard({
                                         // 3. Create Job
                                         const createRes = await fetch(`${API_URL}/jobs`, {
                                             method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${token}`
+                                            },
                                             body: JSON.stringify(jobData)
                                         });
 

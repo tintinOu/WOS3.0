@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import {
     ArrowLeft, Car, Phone, User, Calendar, FileText, Package, Wrench,
     CheckCircle, Clock, Trash2, Edit3, Save, X, AlertCircle, Key,
@@ -484,6 +485,7 @@ function JobDetails({
 
     // File Car-In Button with loading states
     const FileCarInButton = ({ job, onUpdate }) => {
+        const { getAuthToken } = useAuth();
         const [status, setStatus] = useState('idle'); // idle, loading, success, failed
 
         // Check if already filed in (persisted in job data)
@@ -496,9 +498,13 @@ function JobDetails({
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
             try {
+                const token = getAuthToken();
                 const response = await fetch(`${API_URL}/file-car-in`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({
                         vehicle_year: job.vehicle_year,
                         vehicle_make_model: job.vehicle_make_model,
@@ -821,9 +827,13 @@ function JobDetails({
                                                     setShowActionsMenu(false);
                                                     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
                                                     try {
+                                                        const token = getAuthToken();
                                                         const response = await fetch(`${API_URL}/create-calendar-event`, {
                                                             method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'Authorization': `Bearer ${token}`
+                                                            },
                                                             body: JSON.stringify({
                                                                 vehicle_year: job.vehicle_year,
                                                                 vehicle_make_model: job.vehicle_make_model,

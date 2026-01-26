@@ -161,7 +161,7 @@ export function useWorkOrderForm() {
     };
 
     // File Upload Handler
-    const handleFileUpload = async (e) => {
+    const handleFileUpload = async (e, authToken = null) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -173,8 +173,14 @@ export function useWorkOrderForm() {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
         try {
+            const headers = {};
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
             const response = await fetch(`${API_URL}/analyze`, {
                 method: 'POST',
+                headers: headers,
                 body: formData,
             });
 

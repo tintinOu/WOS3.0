@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Loader2, Sparkles } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -9,6 +10,7 @@ const PDFUpload = ({ onDataExtracted, onClose }) => {
     const [status, setStatus] = useState('');
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
+    const { getAuthToken } = useAuth();
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files?.[0];
@@ -47,8 +49,12 @@ const PDFUpload = ({ onDataExtracted, onClose }) => {
 
         try {
             setStatus('Processing with OCR...');
+            const token = getAuthToken();
             const response = await fetch(`${API_URL}/analyze`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData,
             });
 

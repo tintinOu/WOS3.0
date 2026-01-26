@@ -46,7 +46,7 @@ function MobileLayout({ form }) {
         resetForm,
     } = form;
 
-    const { signOut } = useAuth();
+    const { signOut, getAuthToken } = useAuth();
 
     // Navigation state
     const [activeView, setActiveView] = useState('jobs');
@@ -183,7 +183,7 @@ function MobileLayout({ form }) {
                         <input
                             type="file"
                             ref={fileInputRef}
-                            onChange={handleFileUpload}
+                            onChange={(e) => handleFileUpload(e, getAuthToken())}
                             accept=".pdf"
                             className="hidden"
                         />
