@@ -38,12 +38,11 @@ steps:
 
 # Store images in Container Registry
 images:
-  - 'gcr.io/$PROJECT_ID/wos-backend:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/wos-backend:latest'
 
 # Substitution variables (set during build or in trigger)
 substitutions:
-  _ALLOWED_ORIGINS: 'https://your-username.github.io'
+  _ALLOWED_ORIGINS: 'https://tintinou.github.io'
   _AUTHORIZED_EMAILS: '311autobodyrepair@gmail.com;acctingor@gmail.com'
 
 options:
