@@ -8,7 +8,7 @@ import { useClickOutside } from '../hooks/useClickOutside';
  * Dark mode only
  */
 function Sidebar({ activeView, onViewChange, jobsCount = 0, onLogout }) {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
 
     // Auto-collapse when clicking outside (only when sidebar is expanded)
     const handleClickOutside = useCallback(() => {
