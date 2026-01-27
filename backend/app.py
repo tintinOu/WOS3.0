@@ -8,7 +8,8 @@ from flask_cors import CORS
 import fitz  # PyMuPDF
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load environment variables from .env file in the same directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 app = Flask(__name__)
 
