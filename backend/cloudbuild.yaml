@@ -31,10 +31,8 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--set-secrets'
-      - 'GEMINI_API_KEY=gemini-api-key:latest,GOOGLE_CLIENT_ID=google-client-id:latest'
       - '--set-env-vars'
-      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS},AUTHORIZED_EMAILS=${_AUTHORIZED_EMAILS}'
+      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS},AUTHORIZED_EMAILS=${_AUTHORIZED_EMAILS},GOOGLE_CREDENTIALS_PATH=/app/google-credentials.json'
 
 # Store images in Container Registry
 images:
