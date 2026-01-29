@@ -2486,20 +2486,28 @@ const RepairItemRow = ({ item, index, onUpdate, onDelete }) => {
 };
 
 // Standalone EditableField component to ensure stable identity and prevent re-renders
-const EditableFieldComponent = ({ label, value, type = 'text', placeholder = '', mono = false, uppercase = false, canEdit, onSave, inputKey }) => {
+const EditableFieldComponent = React.memo(({ label, value, type = 'text', placeholder = '', mono = false, uppercase = false, canEdit, onSave, inputKey }) => {
     const inputRef = useRef(null);
     const [localValue, setLocalValue] = useState(value || '');
+    const [hasFocus, setHasFocus] = useState(false);
 
-    // Sync local value when external value changes (e.g., after stage change)
+    // Sync local value when external value changes, BUT ONLY if input is not focused
     useEffect(() => {
-        setLocalValue(value || '');
-    }, [value]);
+        if (!hasFocus) {
+            setLocalValue(value || '');
+        }
+    }, [value, hasFocus]);
 
     const handleBlur = () => {
+        setHasFocus(false);
         const newValue = uppercase ? localValue.toUpperCase() : localValue;
         if (newValue !== (value || '')) {
             onSave(newValue);
         }
+    };
+
+    const handleFocus = () => {
+        setHasFocus(true);
     };
 
     const handleChange = (e) => {
@@ -2518,6 +2526,7 @@ const EditableFieldComponent = ({ label, value, type = 'text', placeholder = '',
                     value={localValue}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    onFocus={handleFocus}
                     placeholder={placeholder}
                     className={`w-full mt-1 px-3 py-2 surface text-primary border border-subtle rounded-lg text-sm font-medium focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none ${mono ? 'font-mono' : ''} ${uppercase ? 'uppercase' : ''}`}
                 />
@@ -2533,7 +2542,7 @@ const EditableFieldComponent = ({ label, value, type = 'text', placeholder = '',
             </p>
         </div>
     );
-};
+});
 
 // Use React.memo to prevent unnecessary re-renders but allow updates when job data changes
 export default React.memo(JobDetails, (prevProps, nextProps) => {
@@ -2542,10 +2551,6 @@ export default React.memo(JobDetails, (prevProps, nextProps) => {
 
     // Re-render if stage changes
     if (prevProps.job?.stage !== nextProps.job?.stage) return false;
-
-    // Re-render if key data fields change
-    if (prevProps.job?.customer_phone !== nextProps.job?.customer_phone) return false;
-    if (prevProps.job?.customer_name !== nextProps.job?.customer_name) return false;
 
     // Re-render if timeline changes (new entries added)
     if (prevProps.job?.timeline?.length !== nextProps.job?.timeline?.length) return false;
