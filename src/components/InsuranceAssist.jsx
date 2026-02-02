@@ -11,7 +11,8 @@ import {
     Loader2,
     FileArchive,
     ImagePlus,
-    ZoomIn
+    ZoomIn,
+    RotateCw
 } from 'lucide-react';
 import { useInsurance } from '../hooks/useInsurance';
 import JSZip from 'jszip';
@@ -179,6 +180,36 @@ export default function InsuranceAssist() {
         } catch (err) {
             console.error('Delete photo error:', err);
             alert('Failed to delete photo');
+        }
+    };
+
+    const handleRotatePhoto = async (photo, e) => {
+        if (e) e.stopPropagation();
+
+        try {
+            setUploadStatus('Rotating photo...');
+            setIsUploading(true);
+
+            const token = getAuthToken();
+            const response = await fetch(
+                `${API_URL}/insurance-cases/${selectedCase.id}/photos/${photo.id}/rotate`,
+                {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+
+            if (!response.ok) throw new Error('Failed to rotate photo');
+
+            const result = await response.json();
+            setSelectedCase(result.case);
+            await fetchCases();
+        } catch (err) {
+            console.error('Rotate photo error:', err);
+            alert('Failed to rotate photo');
+        } finally {
+            setIsUploading(false);
+            setUploadStatus('');
         }
     };
 
@@ -426,7 +457,7 @@ export default function InsuranceAssist() {
                                             className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-sm hover:shadow-xl hover:border-accent/30 transition-all cursor-pointer"
                                         >
                                             <img
-                                                src={photo.url}
+                                                src={`${photo.url}${photo.url.includes('?') ? '&' : '?'}t=${new Date(selectedCase.updated_at).getTime()}`}
                                                 alt={photo.name}
                                                 className="w-full h-full object-cover"
                                             />
@@ -438,6 +469,13 @@ export default function InsuranceAssist() {
                                                         title="Download"
                                                     >
                                                         <Download size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleRotatePhoto(photo, e)}
+                                                        className="p-2 bg-black/60 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                                        title="Rotate"
+                                                    >
+                                                        <RotateCw size={14} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => handleDeletePhoto(photo, e)}
@@ -623,7 +661,7 @@ export default function InsuranceAssist() {
                             </button>
 
                             <img
-                                src={enlargedPhoto.url}
+                                src={`${enlargedPhoto.url}${enlargedPhoto.url.includes('?') ? '&' : '?'}t=${new Date(selectedCase.updated_at).getTime()}`}
                                 alt={enlargedPhoto.name}
                                 className="w-full h-full object-contain rounded-2xl"
                                 onClick={(e) => e.stopPropagation()}
@@ -631,13 +669,22 @@ export default function InsuranceAssist() {
 
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl px-4 py-3">
                                 <span className="text-white font-bold text-sm truncate">{enlargedPhoto.name}</span>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleDownloadPhoto(enlargedPhoto, e); }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-colors"
-                                >
-                                    <Download size={14} />
-                                    <span>Download</span>
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleRotatePhoto(enlargedPhoto, e); setEnlargedPhoto(prev => ({ ...prev })); }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-500 transition-colors"
+                                    >
+                                        <RotateCw size={14} />
+                                        <span>Rotate</span>
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDownloadPhoto(enlargedPhoto, e); }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-colors"
+                                    >
+                                        <Download size={14} />
+                                        <span>Download</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

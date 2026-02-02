@@ -1,0 +1,19 @@
+
+# Custom gcloudignore to ALLOW backend secrets for manual deployment
+
+# Defaults
+.git
+.gitignore
+node_modules/
+dist/
+target/
+build/
+
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+
+# Explicitly ALLOW backend config (overrides any potential ignores)
+!backend/.env
+!backend/google-credentials.json

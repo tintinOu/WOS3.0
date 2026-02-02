@@ -400,7 +400,7 @@ def update_existing_insurance_case(case_id):
 def upload_insurance_photo(case_id):
     """Upload a photo to an insurance case."""
     from firebase_config import get_storage_bucket
-    from PIL import Image
+    from PIL import Image, ImageOps
     import io
     import uuid
     
@@ -427,6 +427,10 @@ def upload_insurance_photo(case_id):
         
         # Read and compress image
         img = Image.open(file)
+        
+        # Correct orientation based on EXIF
+        img = ImageOps.exif_transpose(img)
+        
         img = img.convert('RGB')  # Ensure RGB for JPEG
         
         # Resize if too large
@@ -548,6 +552,56 @@ def download_insurance_photo(case_id, photo_name):
         
     except Exception as e:
         print(f"Photo download error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/insurance-cases/<case_id>/photos/<photo_id>/rotate', methods=['POST'])
+@require_auth
+def rotate_insurance_photo(case_id, photo_id):
+    """Rotate a specific photo from an insurance case."""
+    from firebase_config import get_storage_bucket
+    from PIL import Image
+    import io
+    
+    case = get_insurance_case_by_id(case_id)
+    if not case:
+        return jsonify({'error': 'Insurance case not found'}), 404
+    
+    # Find photo metadata
+    photo_metadata = next((p for p in case.get('photos', []) if p.get('id') == photo_id), None)
+    if not photo_metadata:
+        return jsonify({'error': 'Photo not found'}), 404
+    
+    photo_name = photo_metadata['name']
+    
+    try:
+        bucket = get_storage_bucket()
+        blob = bucket.blob(f"insurance_photos/{case_id}/{photo_name}")
+        
+        if not blob.exists():
+            return jsonify({'error': 'Photo blob not found'}), 404
+            
+        # Download
+        content = blob.download_as_bytes()
+        img = Image.open(io.BytesIO(content))
+        
+        # Rotate 90 degrees clockwise
+        img = img.rotate(-90, expand=True)
+        
+        # Save back
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+        
+        # Upload (overwrite)
+        blob.upload_from_file(output, content_type='image/jpeg')
+        
+        from database import update_insurance_case
+        updated_case = update_insurance_case(case_id, {}) # Trigger updated_at
+        
+        return jsonify({'success': True, 'case': updated_case})
+        
+    except Exception as e:
+        print(f"Photo rotate error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/health', methods=['GET'])
