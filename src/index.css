@@ -594,3 +594,24 @@ h6 {
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+/* ============================================
+   SELECT/DROPDOWN DARK MODE FIXES
+   ============================================ */
+
+select {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-text);
+}
+
+select option {
+    background-color: #1A1A1A;
+    color: var(--color-text);
+    padding: 0.5rem;
+}
+
+select option:hover,
+select option:checked {
+    background-color: var(--color-accent);
+    color: white;
+}

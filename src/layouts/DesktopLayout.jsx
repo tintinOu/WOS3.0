@@ -76,7 +76,8 @@ function DesktopLayout({ form }) {
     } = useJobs();
 
     useEffect(() => {
-        if (dateInputRef.current) {
+        // Only initialize flatpickr when the workorder view is active and the ref is available
+        if (activeView === 'workorder' && dateInputRef.current && !dateInputRef.current._flatpickr) {
             flatpickr(dateInputRef.current, {
                 mode: "range",
                 dateFormat: "M j D",
@@ -98,7 +99,7 @@ function DesktopLayout({ form }) {
                 }
             });
         }
-    }, [dateInputRef, setDates]);
+    }, [activeView, dateInputRef, setDates]);
 
     const handlePrint = async () => {
         setIsPrinting(true);
