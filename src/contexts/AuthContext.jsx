@@ -16,6 +16,38 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Check if a JWT token is expired
+    const isTokenExpired = useCallback((tokenToCheck) => {
+        if (!tokenToCheck) return true;
+        try {
+            const payload = decodeJwt(tokenToCheck);
+            if (!payload.exp) return true;
+            // exp is in seconds, Date.now() is in milliseconds
+            // Add 60 second buffer to account for clock skew
+            return (payload.exp * 1000) < (Date.now() + 60000);
+        } catch {
+            return true;
+        }
+    }, []);
+
+    // Decode JWT without verification (verification happens on backend)
+    const decodeJwt = (tokenToDecode) => {
+        try {
+            const base64Url = tokenToDecode.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Failed to decode JWT:', e);
+            return {};
+        }
+    };
+
     // Initialize Google Identity Services
     useEffect(() => {
         // Check for existing session
@@ -23,12 +55,19 @@ export function AuthProvider({ children }) {
         const storedToken = localStorage.getItem('wos_token');
 
         if (storedUser && storedToken) {
-            try {
-                setUser(JSON.parse(storedUser));
-                setToken(storedToken);
-            } catch (e) {
+            // Check if token is expired before restoring session
+            if (isTokenExpired(storedToken)) {
+                console.log('Stored token is expired, clearing session');
                 localStorage.removeItem('wos_user');
                 localStorage.removeItem('wos_token');
+            } else {
+                try {
+                    setUser(JSON.parse(storedUser));
+                    setToken(storedToken);
+                } catch (e) {
+                    localStorage.removeItem('wos_user');
+                    localStorage.removeItem('wos_token');
+                }
             }
         }
 
@@ -83,24 +122,6 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
-    // Decode JWT without verification (verification happens on backend)
-    const decodeJwt = (token) => {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(
-                atob(base64)
-                    .split('')
-                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                    .join('')
-            );
-            return JSON.parse(jsonPayload);
-        } catch (e) {
-            console.error('Failed to decode JWT:', e);
-            return {};
-        }
-    };
-
     // Trigger Google Sign-In
     const signIn = useCallback(() => {
         if (window.google && GOOGLE_CLIENT_ID) {
@@ -127,10 +148,15 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
-    // Get current auth token for API calls
+    // Get current auth token for API calls (checks expiration)
     const getAuthToken = useCallback(() => {
+        if (token && isTokenExpired(token)) {
+            console.log('Token expired during API call, signing out');
+            signOut();
+            return null;
+        }
         return token;
-    }, [token]);
+    }, [token, isTokenExpired, signOut]);
 
     // Render Google Sign-In button into a container
     const renderGoogleButton = useCallback((containerId, options = {}) => {
