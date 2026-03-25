@@ -290,7 +290,7 @@ const PDFOrder = ({ data }) => {
                         <View>
                             {/* Start Date */}
                             <View style={styles.dateRow}>
-                                <Text style={styles.dateLabel}>START:</Text>
+                                <Text style={styles.dateLabel}>CAR-IN:</Text>
                                 <Text style={styles.dateValue}>{dates?.start ? formatDateWithDay(dates.start) : 'N/A'}</Text>
                             </View>
 
